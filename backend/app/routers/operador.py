@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.operador import Operador
 from app.schemas.operador import OperadorCreate, OperadorOut
 from app.services.auth import hash_password
 import re
+import qrcode
+import io
 
 router = APIRouter(prefix="/operadores", tags=["operadores"])
 
@@ -60,3 +63,24 @@ def toggle_activo(operador_id: int, db: Session = Depends(get_db)):
     op.activo = not op.activo
     db.commit()
     return {"activo": op.activo}
+
+# --- NUEVO ENDPOINT PARA QR ---
+@router.get("/{operador_id}/qr")
+def generar_qr(operador_id: int, base_url: str, db: Session = Depends(get_db)):
+    """
+    Genera un código QR que apunta a la página de turnos del operador.
+    base_url debe ser la URL de Vercel (ej: https://turnoya.vercel.app)
+    """
+    op = db.query(Operador).filter(Operador.id == operador_id).first()
+    if not op:
+        raise HTTPException(status_code=404, detail="Operador no encontrado")
+    
+    # La URL que el cliente escaneará
+    url = f"{base_url}/index.html?op={operador_id}"
+    
+    img = qrcode.make(url)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    
+    return StreamingResponse(buf, media_type="image/png")
