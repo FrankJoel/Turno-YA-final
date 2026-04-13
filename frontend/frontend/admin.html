@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TurnoYa — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <div class="topbar">
+    <button onclick="abrirMenu()" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer;">☰</button>
+    <div class="logo-text">Turno<span>YA</span></div>
+    <div style="width:32px;"></div>
+  </div>
+
+  <div class="container" style="padding-top:20px;">
+    <p id="bienvenida" style="font-size:15px; font-weight:600; color:var(--primary); margin-bottom:16px;"></p>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-val" id="total-atendidos">—</div>
+        <div class="stat-label">Atendidos hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="total-espera">—</div>
+        <div class="stat-label">En espera</div>
+      </div>
+    </div>
+
+    <div class="section-title">Estado de operadores</div>
+    <div class="card" style="padding:0; overflow:hidden;">
+      <table>
+        <thead>
+          <tr>
+            <th>Operador</th>
+            <th>Estado</th>
+            <th>Atendidos</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-operadores">
+          <tr><td colspan="3" style="text-align:center;padding:20px;"><div class="spinner"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-title">Cola general</div>
+    <div class="card" style="padding:0; overflow:hidden;">
+      <table>
+        <thead>
+          <tr>
+            <th>Turno</th>
+            <th>Operador</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-cola">
+          <tr><td colspan="3" style="text-align:center;padding:20px;">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="menu-overlay" id="menu-overlay" onclick="cerrarMenu()">
+    <div class="menu-panel" onclick="event.stopPropagation()">
+      <div class="menu-header">
+        <div class="user-name" id="menu-nombre"></div>
+        <div class="user-role">Administrador</div>
+      </div>
+      <div class="menu-items">
+        <a class="menu-item" href="admin.html">Panel de operaciones →</a>
+        <a class="menu-item" href="abm.html">ABM Usuarios →</a>
+        <a class="menu-item" href="estadisticas.html">Estadísticas →</a>
+      </div>
+      <div class="menu-footer">
+        <button class="btn btn-outline" onclick="cerrarSesion()" style="color:var(--danger);border-color:var(--danger);">
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    const user = api.getUser()
+    if (!user.operador_id || user.rol !== 'admin') window.location.href = 'login.html'
+
+    const establecimientoId = 1
+    document.getElementById('bienvenida').textContent = `¡Bienvenido, ${user.nombre}! Panel de operaciones`
+    document.getElementById('menu-nombre').textContent = user.nombre
+
+    async function cargarDatos() {
+      try {
+        const operadores = await api.getOperadores(establecimientoId)
+        const estadOps = await api.getEstadisticasOperadores(establecimientoId)
+
+        let totalAtendidos = 0
+        let totalEspera = 0
+        let colaHtml = ''
+        let opsHtml = ''
+
+        for (const op of operadores) {
+          const stat = estadOps.find(e => e.puesto === op.puesto) || {}
+          totalAtendidos += stat.atendidos || 0
+
+          const estado = !op.activo ? 'Sin conectar' : !op.fila_abierta ? 'Fila cerrada' : 'Atendiendo'
+          const badge = !op.activo ? 'badge-red' : !op.fila_abierta ? 'badge-amber' : 'badge-green'
+
+          opsHtml += `
+            <tr>
+              <td>${op.nombre} ${op.apellido}</td>
+              <td><span class="badge ${badge}">${estado}</span></td>
+              <td>${stat.atendidos || 0}</td>
+            </tr>`
+
+          const cola = await api.getCola(op.id)
+          totalEspera += cola.filter(t => t.estado === 'esperando').length
+
+          cola.forEach(t => {
+            const estadoBadge = t.estado === 'atendiendo' ? 'badge-green' : 'badge-blue'
+            colaHtml += `
+              <tr>
+                <td>${t.codigo}</td>
+                <td>${op.nombre}</td>
+                <td><span class="badge ${estadoBadge}">${t.estado}</span></td>
+              </tr>`
+          })
+        }
+
+        document.getElementById('total-atendidos').textContent = totalAtendidos
+        document.getElementById('total-espera').textContent = totalEspera
+        document.getElementById('tabla-operadores').innerHTML = opsHtml || '<tr><td colspan="3" style="text-align:center;padding:16px;">Sin operadores</td></tr>'
+        document.getElementById('tabla-cola').innerHTML = colaHtml || '<tr><td colspan="3" style="text-align:center;padding:16px;">Cola vacía</td></tr>'
+
+      } catch (e) { console.error(e) }
+    }
+
+    function abrirMenu() { document.getElementById('menu-overlay').style.display = 'block' }
+    function cerrarMenu() { document.getElementById('menu-overlay').style.display = 'none' }
+    function cerrarSesion() { api.clearSession(); window.location.href = 'login.html' }
+
+    cargarDatos()
+    setInterval(cargarDatos, 20000)
+  </script>
+</body>
+</html>

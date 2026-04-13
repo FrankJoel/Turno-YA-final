@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TurnoYa — Ingreso</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="logo" style="margin-top: 48px;">
+      <img src="assets/logo.png" alt="TurnoYa">
+    </div>
+
+    <p style="text-align:center; font-size:13px; color:var(--text-muted); margin-bottom:24px;">
+      Área empleados
+    </p>
+
+    <div id="alert-container"></div>
+
+    <div class="card">
+      <div class="form-group">
+        <label>Usuario</label>
+        <input type="text" id="username" placeholder="juangarcia">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="password" placeholder="••••••••">
+      </div>
+      <button class="btn btn-primary" onclick="login()">Ingresar</button>
+    </div>
+
+    <div style="text-align:center; margin-top:12px;">
+      <a href="index.html" style="font-size:13px; color:var(--text-muted); text-decoration:none;">
+        ← Volver al inicio
+      </a>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    async function login() {
+      const username = document.getElementById('username').value.trim()
+      const password = document.getElementById('password').value
+
+      if (!username || !password) {
+        document.getElementById('alert-container').innerHTML =
+          `<div class="alert alert-error">Completá todos los campos</div>`
+        return
+      }
+
+      try {
+        const data = await api.login(username, password)
+        api.saveSession(data)
+        if (data.rol === 'admin') {
+          window.location.href = 'admin.html'
+        } else {
+          window.location.href = 'operador.html'
+        }
+      } catch (e) {
+        document.getElementById('alert-container').innerHTML =
+          `<div class="alert alert-error">${e.message}</div>`
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') login()
+    })
+  </script>
+</body>
+</html>

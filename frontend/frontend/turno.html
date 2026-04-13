@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TurnoYa — Tu turno</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <img src="assets/logo.png" alt="TurnoYa">
+    </div>
+
+    <div id="bienvenida" style="text-align:center; font-size:15px; margin-bottom:16px; color:var(--text-muted)"></div>
+
+    <div class="card" style="text-align:center;">
+      <div class="queue-display" id="queue-display">
+        <div class="spinner"></div>
+      </div>
+
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Tu turno es</p>
+      <div class="turno-code" id="mi-turno">—</div>
+      <p id="mi-motivo" style="font-size:13px; color:var(--text-muted); margin-bottom:20px;"></p>
+
+      <div class="time-display">
+        Tiempo estimado de espera
+        <strong id="tiempo-espera">—</strong>
+      </div>
+
+      <div id="alert-container"></div>
+
+      <button class="btn btn-danger" onclick="confirmarCancelar()" id="btn-cancelar">
+        Cancelar turno
+      </button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-cancelar">
+    <div class="modal">
+      <h3>Cancelar turno</h3>
+      <p>¿Estás seguro que querés cancelar tu turno? Perderás tu lugar en la cola.</p>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="cerrarModal()">Volver</button>
+        <button class="btn btn-danger" onclick="cancelarTurno()">Sí, cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    const turnoId = localStorage.getItem('turno_id')
+    const operadorId = localStorage.getItem('operador_id')
+    let ws
+
+    async function cargarPosicion() {
+      if (!turnoId) return window.location.href = 'index.html'
+      try {
+        const data = await api.getPosicion(turnoId)
+        document.getElementById('bienvenida').textContent = `¡Bienvenido, ${data.nombre_cliente}!`
+        document.getElementById('mi-turno').textContent = data.codigo
+        document.getElementById('mi-motivo').textContent = data.motivo
+
+        const mins = data.tiempo_estimado_minutos
+        document.getElementById('tiempo-espera').textContent =
+          mins === 0 ? '¡Es tu turno!' : `~${mins} min`
+
+        renderCola(data)
+      } catch (e) {
+        document.getElementById('alert-container').innerHTML =
+          `<div class="alert alert-error">${e.message}</div>`
+      }
+    }
+
+    function renderCola(data) {
+      const pos = data.posicion
+      const codigo = data.codigo
+      const partes = codigo.split('-')
+      const prefijo = partes[0]
+      const num = parseInt(partes[1])
+
+      let html = ''
+      if (pos > 1) html += `<div class="queue-item prev">${prefijo}-${String(num - 2).padStart(3,'0')}</div>`
+      if (pos > 0) html += `<div class="queue-item">${prefijo}-${String(num - 1).padStart(3,'0')}</div>`
+      html += `<div class="queue-item current">${codigo}</div>`
+      if (pos >= 0) html += `<div class="queue-item next">${prefijo}-${String(num + 1).padStart(3,'0')}</div>`
+
+      document.getElementById('queue-display').innerHTML = html
+    }
+
+    function conectarWS() {
+      if (!operadorId) return
+      ws = api.conectarWS(operadorId, (msg) => {
+        if (msg.evento === 'siguiente_turno' || msg.evento === 'turno_cancelado') {
+          cargarPosicion()
+        }
+      })
+    }
+
+    function confirmarCancelar() {
+      document.getElementById('modal-cancelar').classList.add('active')
+    }
+
+    function cerrarModal() {
+      document.getElementById('modal-cancelar').classList.remove('active')
+    }
+
+    async function cancelarTurno() {
+      try {
+        await api.cancelarTurno(turnoId)
+        localStorage.removeItem('turno_id')
+        localStorage.removeItem('operador_id')
+        window.location.href = 'index.html'
+      } catch (e) {
+        cerrarModal()
+        document.getElementById('alert-container').innerHTML =
+          `<div class="alert alert-error">${e.message}</div>`
+      }
+    }
+
+    cargarPosicion()
+    conectarWS()
+    setInterval(cargarPosicion, 30000)
+  </script>
+</body>
+</html>

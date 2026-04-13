@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TurnoYa — Pantalla</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #0A1628;
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .tv-header {
+      background: #1F4E79;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .tv-logo { font-size: 28px; font-weight: 700; }
+    .tv-logo span { color: #7BC8F6; }
+    .tv-subtitle { font-size: 14px; opacity: 0.7; }
+    .tv-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      padding: 40px;
+    }
+    .tv-current {
+      background: #fff;
+      color: #1F4E79;
+      border-radius: 20px;
+      padding: 32px 80px;
+      text-align: center;
+    }
+    .tv-current-label { font-size: 18px; color: #888; margin-bottom: 8px; }
+    .tv-current-code { font-size: 96px; font-weight: 700; letter-spacing: 4px; line-height: 1; }
+    .tv-next-label { font-size: 16px; color: #7BC8F6; margin-bottom: 8px; }
+    .tv-next-code { font-size: 36px; font-weight: 600; color: #fff; }
+    .tv-queue {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .tv-queue-item {
+      background: rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-size: 20px;
+      color: rgba(255,255,255,0.5);
+    }
+    .tv-time {
+      font-size: 14px;
+      color: rgba(255,255,255,0.4);
+      position: absolute;
+      bottom: 20px;
+      right: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="tv-header">
+    <div>
+      <div class="tv-logo">Turno<span>YA</span></div>
+      <div class="tv-subtitle">Sala de Espera Virtual</div>
+    </div>
+    <div id="tv-time" style="font-size:24px; opacity:0.8;"></div>
+  </div>
+
+  <div class="tv-body">
+    <div class="tv-current">
+      <div class="tv-current-label">Turno actual</div>
+      <div class="tv-current-code" id="turno-actual">—</div>
+    </div>
+
+    <div style="text-align:center;">
+      <div class="tv-next-label">Siguiente turno</div>
+      <div class="tv-next-code" id="turno-siguiente">—</div>
+    </div>
+
+    <div class="tv-queue" id="tv-queue"></div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search)
+    const operadorId = params.get('op')
+
+    async function cargarCola() {
+      if (!operadorId) return
+      try {
+        const cola = await api.getCola(operadorId)
+        const atendiendo = cola.find(t => t.estado === 'atendiendo')
+        const esperando = cola.filter(t => t.estado === 'esperando')
+
+        document.getElementById('turno-actual').textContent =
+          atendiendo ? atendiendo.codigo : '—'
+        document.getElementById('turno-siguiente').textContent =
+          esperando[0] ? esperando[0].codigo : '—'
+
+        const queueEl = document.getElementById('tv-queue')
+        queueEl.innerHTML = esperando.slice(1, 5).map(t =>
+          `<div class="tv-queue-item">${t.codigo}</div>`
+        ).join('')
+      } catch (e) { console.error(e) }
+    }
+
+    function actualizarHora() {
+      const now = new Date()
+      document.getElementById('tv-time').textContent =
+        now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+    }
+
+    api.conectarWS(operadorId, () => cargarCola())
+    cargarCola()
+    actualizarHora()
+    setInterval(actualizarHora, 1000)
+    setInterval(cargarCola, 15000)
+  </script>
+</body>
+</html>

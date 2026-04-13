@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TurnoYa — ABM Usuarios</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <div class="topbar">
+    <a href="admin.html" style="color:#fff;font-size:20px;text-decoration:none;">←</a>
+    <div class="logo-text">Turno<span>YA</span></div>
+    <div style="width:32px;"></div>
+  </div>
+
+  <div class="container" style="padding-top:20px;">
+    <div id="alert-container"></div>
+
+    <div class="section-title">Operadores registrados</div>
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:20px;">
+      <table>
+        <thead>
+          <tr><th>Operador</th><th>Puesto</th><th>Activo</th><th>QR</th></tr>
+        </thead>
+        <tbody id="tabla-ops">
+          <tr><td colspan="4" style="text-align:center;padding:20px;">
+            <div class="spinner"></div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-title">Agregar operador</div>
+    <div class="card">
+      <div class="form-group">
+        <label>Nombre</label>
+        <input type="text" id="nuevo-nombre" placeholder="Juan">
+      </div>
+      <div class="form-group">
+        <label>Apellido</label>
+        <input type="text" id="nuevo-apellido" placeholder="García">
+      </div>
+      <div class="form-group">
+        <label>DNI</label>
+        <input type="number" id="nuevo-dni" placeholder="30123456">
+      </div>
+      <div class="form-group">
+        <label>Puesto</label>
+        <input type="text" id="nuevo-puesto" placeholder="P1">
+      </div>
+      <div class="form-group">
+        <label>Rol</label>
+        <select id="nuevo-rol">
+          <option value="operador">Operador</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+      <div id="alert-form"></div>
+      <button class="btn btn-primary" id="btn-agregar" onclick="agregarOperador()">
+        Agregar operador
+      </button>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    const user = api.getUser()
+    if (!user.operador_id || user.rol !== 'admin') {
+      window.location.href = 'login.html'
+    }
+
+    const establecimientoId = 1
+    const BASE_URL = window.location.origin + window.location.pathname.replace('abm.html', '')
+
+    async function cargarOperadores() {
+      try {
+        const ops = await api.getOperadores(establecimientoId)
+        const tbody = document.getElementById('tabla-ops')
+        if (!ops.length) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--text-muted)">Sin operadores registrados</td></tr>'
+          return
+        }
+        tbody.innerHTML = ops.map(op => `
+          <tr>
+            <td>
+              <strong>${op.nombre} ${op.apellido}</strong><br>
+              <small style="color:var(--text-muted)">@${op.username}</small>
+            </td>
+            <td>${op.puesto}</td>
+            <td>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" ${op.activo ? 'checked' : ''}
+                  onchange="toggleOp(${op.id})"
+                  style="width:16px;height:16px;cursor:pointer;">
+                <span class="badge ${op.activo ? 'badge-green' : 'badge-red'}">
+                  ${op.activo ? 'Activo' : 'Inactivo'}
+                </span>
+              </label>
+            </td>
+            <td>
+              <a href="${API_URL}/operadores/${op.id}/qr?base_url=${BASE_URL}"
+                target="_blank"
+                style="font-size:12px;color:var(--accent);text-decoration:none;">
+                Ver QR
+              </a>
+            </td>
+          </tr>
+        `).join('')
+      } catch (e) {
+        document.getElementById('alert-container').innerHTML =
+          `<div class="alert alert-error">Error al cargar operadores: ${e.message}</div>`
+      }
+    }
+
+    async function toggleOp(id) {
+      try {
+        await api.toggleOperador(id)
+        await cargarOperadores()
+      } catch (e) {
+        document.getElementById('alert-container').innerHTML =
+          `<div class="alert alert-error">${e.message}</div>`
+      }
+    }
+
+    async function agregarOperador() {
+      const nombre = document.getElementById('nuevo-nombre').value.trim()
+      const apellido = document.getElementById('nuevo-apellido').value.trim()
+      const dni = document.getElementById('nuevo-dni').value.trim()
+      const puesto = document.getElementById('nuevo-puesto').value.trim().toUpperCase()
+      const rol = document.getElementById('nuevo-rol').value
+
+      if (!nombre || !apellido || !dni || !puesto) {
+        document.getElementById('alert-form').innerHTML =
+          `<div class="alert alert-error">Completá todos los campos</div>`
+        return
+      }
+
+      const btn = document.getElementById('btn-agregar')
+      btn.disabled = true
+      btn.textContent = 'Agregando...'
+
+      try {
+        const op = await api.crearOperador({
+          nombre, apellido, dni, puesto, rol,
+          establecimiento_id: establecimientoId
+        })
+        document.getElementById('alert-form').innerHTML =
+          `<div class="alert alert-success">
+            ✓ Operador creado correctamente<br>
+            <strong>Usuario:</strong> ${op.username}<br>
+            <strong>Contraseña temporal:</strong> ${nombre.toLowerCase()}${dni.slice(-4)}
+          </div>`
+        document.getElementById('nuevo-nombre').value = ''
+        document.getElementById('nuevo-apellido').value = ''
+        document.getElementById('nuevo-dni').value = ''
+        document.getElementById('nuevo-puesto').value = ''
+        await cargarOperadores()
+      } catch (e) {
+        document.getElementById('alert-form').innerHTML =
+          `<div class="alert alert-error">${e.message}</div>`
+      }
+
+      btn.disabled = false
+      btn.textContent = 'Agregar operador'
+    }
+
+    cargarOperadores()
+  </script>
+</body>
+</html>

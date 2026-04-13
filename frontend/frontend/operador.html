@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TurnoYa — Panel Operador</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <div class="topbar">
+    <button onclick="abrirMenu()" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer;">☰</button>
+    <div class="logo-text">Turno<span>YA</span></div>
+    <div style="width:32px;"></div>
+  </div>
+
+  <div class="container" style="padding-top:20px;">
+    <div id="alert-container"></div>
+
+    <div class="card">
+      <p id="bienvenida" style="font-size:15px; font-weight:600; color:var(--primary); margin-bottom:16px;"></p>
+
+      <div class="stat-grid" style="margin-bottom:16px;">
+        <div class="stat-card">
+          <div class="stat-val" id="count-atendidos">0</div>
+          <div class="stat-label">Atendidos hoy</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="count-espera">0</div>
+          <div class="stat-label">En espera</div>
+        </div>
+      </div>
+
+      <table id="tabla-cola">
+        <thead>
+          <tr>
+            <th>Turno</th>
+            <th>Cliente</th>
+            <th>Motivo</th>
+          </tr>
+        </thead>
+        <tbody id="cola-body">
+          <tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Sin turnos en espera</td></tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:16px; display:flex; flex-direction:column; gap:10px;">
+        <button class="btn btn-success" id="btn-siguiente" onclick="siguienteTurno()">
+          Siguiente turno
+        </button>
+        <button class="btn btn-outline" id="btn-fila" onclick="toggleFila()">
+          Cerrar fila
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="menu-overlay" id="menu-overlay" onclick="cerrarMenu()">
+    <div class="menu-panel" onclick="event.stopPropagation()">
+      <div class="menu-header">
+        <div class="user-name" id="menu-nombre"></div>
+        <div class="user-role">Operador</div>
+      </div>
+      <div class="menu-items">
+        <a class="menu-item" href="operador.html">Panel principal →</a>
+        <a class="menu-item" href="estadisticas.html">Estadísticas →</a>
+      </div>
+      <div class="menu-footer">
+        <button class="btn btn-outline danger" onclick="cerrarSesion()" style="color:var(--danger); border-color:var(--danger);">
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    const user = api.getUser()
+    if (!user.operador_id) window.location.href = 'login.html'
+
+    document.getElementById('bienvenida').textContent = `¡Bienvenido, ${user.nombre}!`
+    document.getElementById('menu-nombre').textContent = user.nombre
+
+    let filaAbierta = true
+
+    async function cargarCola() {
+      try {
+        const cola = await api.getCola(user.operador_id)
+        const esperando = cola.filter(t => t.estado === 'esperando')
+        const atendiendo = cola.filter(t => t.estado === 'atendiendo')
+
+        document.getElementById('count-espera').textContent = esperando.length
+
+        const tbody = document.getElementById('cola-body')
+        if (cola.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Sin turnos en espera</td></tr>`
+          return
+        }
+
+        tbody.innerHTML = cola.map((t, i) => `
+          <tr style="${t.estado === 'atendiendo' ? 'background:#EAF3DE;font-weight:600;' : ''}">
+            <td>${t.codigo}</td>
+            <td>${t.nombre_cliente}</td>
+            <td>${t.motivo}</td>
+          </tr>
+        `).join('')
+      } catch (e) { console.error(e) }
+    }
+
+    async function siguienteTurno() {
+      const btn = document.getElementById('btn-siguiente')
+      btn.disabled = true
+      try {
+        await api.siguienteTurno(user.operador_id)
+        await cargarCola()
+        document.getElementById('count-atendidos').textContent =
+          parseInt(document.getElementById('count-atendidos').textContent) + 1
+      } catch (e) {
+        document.getElementById('alert-container').innerHTML =
+          `<div class="alert alert-error">${e.message}</div>`
+      }
+      btn.disabled = false
+    }
+
+    async function toggleFila() {
+      try {
+        const res = await api.toggleFila(user.operador_id)
+        filaAbierta = res.fila_abierta
+        document.getElementById('btn-fila').textContent =
+          filaAbierta ? 'Cerrar fila' : 'Abrir fila'
+        document.getElementById('btn-fila').className =
+          filaAbierta ? 'btn btn-outline' : 'btn btn-danger'
+      } catch (e) { console.error(e) }
+    }
+
+    function abrirMenu() {
+      document.getElementById('menu-overlay').style.display = 'block'
+    }
+    function cerrarMenu() {
+      document.getElementById('menu-overlay').style.display = 'none'
+    }
+    function cerrarSesion() {
+      api.clearSession()
+      window.location.href = 'login.html'
+    }
+
+    api.conectarWS(user.operador_id, (msg) => {
+      if (['nuevo_turno', 'siguiente_turno', 'turno_cancelado'].includes(msg.evento)) {
+        cargarCola()
+      }
+    })
+
+    cargarCola()
+    setInterval(cargarCola, 30000)
+  </script>
+</body>
+</html>
