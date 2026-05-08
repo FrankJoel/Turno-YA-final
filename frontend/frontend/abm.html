@@ -1,172 +1,245 @@
 <!DOCTYPE html>
-<html lang="es">
+<html class="light" lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TurnoYa — ABM Usuarios</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>TurnoYa - Alta de Operador</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode:"class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-container-highest":"#e0e3e6",
+            "surface-container-high":"#e6e8eb",
+            "surface-container-low":"#f2f4f7",
+            "surface-container-lowest":"#ffffff",
+            "outline-variant":"#c1c7d2",
+            "outline":"#717782",
+            "on-surface":"#191c1e",
+            "on-surface-variant":"#414750",
+            "primary":"#005b9c",
+            "primary-container":"#2b74b9",
+            "on-primary":"#ffffff",
+            "secondary":"#4a607c",
+            "on-secondary":"#ffffff",
+            "surface":"#f7f9fc",
+          },
+          borderRadius: { DEFAULT:"1rem", lg:"2rem", xl:"3rem", full:"9999px" },
+          fontFamily: { headline:["Manrope"], body:["Inter"] }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family:'Inter', sans-serif; }
+    h1, h2, h3 { font-family:'Manrope', sans-serif; }
+    .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+    input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(30%) sepia(50%) saturate(1000%) hue-rotate(180deg); cursor: pointer; }
+  </style>
 </head>
-<body>
 
-  <div class="topbar">
-    <a href="admin.html" style="color:#fff;font-size:20px;text-decoration:none;">←</a>
-    <div class="logo-text">Turno<span>YA</span></div>
-    <div style="width:32px;"></div>
+<body class="bg-surface text-on-surface min-h-screen flex">
+
+  <aside class="h-screen w-64 fixed left-0 top-0 bg-slate-100 flex flex-col py-6 space-y-2 font-['Manrope'] font-medium text-sm">
+    <div class="px-8 mb-10">
+      <h1 class="text-xl font-black text-blue-700 tracking-tighter">TurnoYa</h1>
+      <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Admin</p>
+    </div>
+  <nav class="h-full w-72 fixed left-0 top-0 flex flex-col py-8 bg-[#f2f4f7] z-50 border-r border-slate-200">
+  <div class="px-8 mb-12 flex items-center gap-3">
+    <div class="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-white shadow-lg">
+      <span class="material-symbols-outlined">confirmation_number</span>
+    </div>
+    <span class="text-2xl font-black text-[#2B74B9]">TurnoYa</span>
   </div>
 
-  <div class="container" style="padding-top:20px;">
-    <div id="alert-container"></div>
+  <div class="flex-1 flex flex-col gap-2">
+    
+    <a href="AdminOperaciones.html" id="nav-operaciones" 
+       class="mx-4 px-6 py-3 rounded-full transition-all flex items-center gap-4 text-slate-600 hover:bg-white/50">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span class="font-semibold">Operaciones</span>
+    </a>
 
-    <div class="section-title">Operadores registrados</div>
-    <div class="card" style="padding:0;overflow:hidden;margin-bottom:20px;">
-      <table>
-        <thead>
-          <tr><th>Operador</th><th>Puesto</th><th>Activo</th><th>QR</th></tr>
-        </thead>
-        <tbody id="tabla-ops">
-          <tr><td colspan="4" style="text-align:center;padding:20px;">
-            <div class="spinner"></div>
-          </td></tr>
-        </tbody>
-      </table>
-    </div>
+    <a href="estadisticasAdmin.html" id="nav-estadisticas" 
+       class="mx-4 px-6 py-3 rounded-full transition-all flex items-center gap-4 text-slate-600 hover:bg-white/50">
+      <span class="material-symbols-outlined">monitoring</span>
+      <span class="font-semibold">Estadísticas</span>
+    </a>
 
-    <div class="section-title">Agregar operador</div>
-    <div class="card">
-      <div class="form-group">
-        <label>Nombre</label>
-        <input type="text" id="nuevo-nombre" placeholder="Juan">
-      </div>
-      <div class="form-group">
-        <label>Apellido</label>
-        <input type="text" id="nuevo-apellido" placeholder="García">
-      </div>
-      <div class="form-group">
-        <label>DNI</label>
-        <input type="number" id="nuevo-dni" placeholder="30123456">
-      </div>
-      <div class="form-group">
-        <label>Puesto</label>
-        <input type="text" id="nuevo-puesto" placeholder="P1">
-      </div>
-      <div class="form-group">
-        <label>Rol</label>
-        <select id="nuevo-rol">
-          <option value="operador">Operador</option>
-          <option value="admin">Administrador</option>
-        </select>
-      </div>
-      <div id="alert-form"></div>
-      <button class="btn btn-primary" id="btn-agregar" onclick="agregarOperador()">
-        Agregar operador
+    <a href="AdminGestionUser.html" id="nav-usuarios" 
+       class="mx-4 px-6 py-3 rounded-full transition-all flex items-center gap-4 text-slate-600 hover:bg-white/50">
+      <span class="material-symbols-outlined">group</span>
+      <span class="font-semibold">Gestión de Usuarios</span>
+    </a>
+
+    <a href="admin_configuracion.html" id="nav-config" 
+       class="mx-4 px-6 py-3 rounded-full transition-all flex items-center gap-4 text-slate-600 hover:bg-white/50">
+      <span class="material-symbols-outlined">settings</span>
+      <span class="font-semibold">Configuración</span>
+    </a>
+  </div>
+
+  <div class="px-4 mt-auto">
+    <button onclick="cerrarSesion()" class="w-full flex items-center gap-4 px-6 py-3 text-red-500 hover:bg-red-50 rounded-full transition-colors">
+      <span class="material-symbols-outlined">logout</span>
+      <span class="font-semibold">Salir</span>
+    </button>
+  </div>
+</nav>
+    <div class="px-6">
+      <button onclick="cerrarSesion()" class="w-full flex items-center gap-3 text-red-400 hover:text-red-600 px-4 py-3 hover:bg-red-50 rounded-full transition-all">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="font-bold text-sm">Cerrar sesión</span>
       </button>
     </div>
-  </div>
+  </aside>
 
-  <script src="js/api.js"></script>
+  <main class="flex-1 ml-64 min-h-screen flex flex-col">
+    <header class="sticky top-0 z-50 bg-slate-50/80 backdrop-blur-xl shadow-sm flex justify-between items-center w-full px-8 py-4">
+      <h2 class="text-xl font-['Manrope'] font-bold tracking-tight text-on-surface">Gestión de Usuarios</h2>
+    </header>
+
+    <div class="flex-1 p-10 flex justify-center items-start">
+      <div class="w-full max-w-4xl bg-surface-container-lowest rounded-xl shadow-[0_20px_40px_rgba(25,28,30,0.06)] overflow-hidden border border-outline-variant/10">
+
+        <div class="px-10 py-8 bg-surface-container-low/50 border-b border-outline-variant/10">
+          <h3 class="text-2xl font-['Manrope'] font-extrabold text-primary tracking-tight">ALTA OPERADOR</h3>
+          <p class="text-on-surface-variant text-sm mt-1">Completá los datos del nuevo integrante del equipo.</p>
+        </div>
+
+        <form class="p-10 space-y-10" id="form-alta-op">
+
+          <div class="grid grid-cols-2 gap-8">
+            <div class="space-y-2">
+              <label class="text-xs font-bold text-outline uppercase tracking-widest ml-4">Nombre</label>
+              <input name="nombre" placeholder="Ej. Juan" type="text" required
+                     class="w-full bg-surface-container-high border-none rounded-full px-6 py-4 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface"/>
+            </div>
+            <div class="space-y-2">
+              <label class="text-xs font-bold text-outline uppercase tracking-widest ml-4">Apellido</label>
+              <input name="apellido" placeholder="Ej. Pérez" type="text" required
+                     class="w-full bg-surface-container-high border-none rounded-full px-6 py-4 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface"/>
+            </div>
+            <div class="space-y-2">
+              <label class="text-xs font-bold text-outline uppercase tracking-widest ml-4">DNI</label>
+              <input name="dni" placeholder="00000000" type="text" pattern="[0-9]{7,10}" required
+                     class="w-full bg-surface-container-high border-none rounded-full px-6 py-4 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface"/>
+            </div>
+            <div class="space-y-2">
+              <label class="text-xs font-bold text-outline uppercase tracking-widest ml-4">Rol</label>
+              <select name="rol" class="w-full bg-surface-container-high border-none rounded-full px-6 py-4 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface appearance-none">
+                <option value="operador">Operador</option>
+                <option value="admin">Administrador</option>
+              </select>
+            </div>
+            <div class="space-y-2 col-span-2">
+              <label class="text-xs font-bold text-outline uppercase tracking-widest ml-4">Puesto</label>
+              <select name="puesto" required class="w-full bg-surface-container-high border-none rounded-full px-6 py-4 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface appearance-none">
+                <option value="" disabled selected>Seleccioná un puesto</option>
+                <option value="P1">Puesto 1</option>
+                <option value="P2">Puesto 2</option>
+                <option value="P3">Puesto 3</option>
+                <option value="P4">Puesto 4</option>
+                <option value="P5">Puesto 5</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="space-y-6">
+            <div class="flex justify-between items-center px-2">
+              <h3 class="text-lg font-extrabold text-primary tracking-tight uppercase">Habilidades y Servicios</h3>
+              <button type="button" onclick="agregarFila()" class="bg-primary/10 text-primary px-4 py-2 rounded-full font-black text-xs flex items-center gap-2 hover:bg-primary hover:text-white transition-all">
+                <span class="material-symbols-outlined text-sm">add</span> NUEVO SERVICIO
+              </button>
+            </div>
+
+            <div class="bg-surface-container-low rounded-2xl border border-outline-variant/20 overflow-hidden">
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="text-[10px] font-black text-outline uppercase tracking-widest border-b border-outline-variant/10 bg-surface-container-high/30">
+                    <th class="px-6 py-4 w-16 text-center">OK</th>
+                    <th class="px-4 py-4">Servicio</th>
+                    <th class="px-6 py-4 text-right">Duración (HH:MM)</th>
+                    <th class="px-6 py-4 w-16"></th>
+                  </tr>
+                </thead>
+                <tbody id="lista-motivos" class="divide-y divide-outline-variant/10">
+                  <tr class="bg-white/40">
+                    <td class="px-6 py-4 text-center">
+                      <input type="checkbox" checked class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20">
+                    </td>
+                    <td class="px-4 py-4">
+                      <input type="text" value="Corte + Barba" class="w-full bg-transparent border-none p-0 font-bold text-sm text-on-surface focus:ring-0">
+                    </td>
+                    <td class="px-6 py-4 text-right font-black text-lg text-primary">
+                      <input type="text" value="00:30" class="bg-surface-container-high rounded-lg border-none px-3 py-1 w-20 text-right focus:ring-2 focus:ring-primary/20">
+                    </td>
+                    <td class="px-6 py-4">
+                      <button type="button" onclick="this.closest('tr').remove()" class="text-outline-variant hover:text-red-500 transition-colors">
+                        <span class="material-symbols-outlined">delete</span>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <p class="text-sm text-on-surface-variant bg-surface-container-low p-4 rounded-2xl">
+            <span class="font-bold">Nota:</span> El username se genera automáticamente combinando nombre + apellido. La contraseña temporal será nombre + últimos 4 dígitos del DNI.
+          </p>
+
+          <div class="pt-6 flex flex-wrap gap-4">
+            <button type="button" class="bg-secondary hover:bg-slate-700 text-white font-black text-lg py-5 rounded-full flex items-center justify-center gap-3 shadow-xl transition-all hover:scale-[1.01] active:scale-95 flex-1">
+              <span class="material-symbols-outlined">qr_code_2</span>
+              Generar QR
+            </button>
+            <button type="submit"
+                    class="bg-[#1e8e3e] hover:bg-[#156d2f] text-white font-black text-lg py-5 rounded-full flex items-center justify-center gap-3 shadow-xl shadow-green-900/10 transition-all hover:scale-[1.01] active:scale-95 flex-[1.5]">
+              <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">check_circle</span>
+              Agregar Operador
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
   <script>
-    const user = api.getUser()
-    if (!user.operador_id || user.rol !== 'admin') {
-      window.location.href = 'login.html'
+    function agregarFila() {
+      const tbody = document.getElementById('lista-motivos');
+      const tr = document.createElement('tr');
+      tr.className = "bg-white/40";
+      tr.innerHTML = `
+        <td class="px-6 py-4 text-center">
+          <input type="checkbox" checked class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20">
+        </td>
+        <td class="px-4 py-4">
+          <input type="text" placeholder="Nuevo servicio..." class="w-full bg-transparent border-none p-0 font-bold text-sm text-on-surface focus:ring-0">
+        </td>
+        <td class="px-6 py-4 text-right font-black text-lg text-primary">
+          <input type="text" value="00:00" class="bg-surface-container-high rounded-lg border-none px-3 py-1 w-20 text-right focus:ring-2 focus:ring-primary/20">
+        </td>
+        <td class="px-6 py-4">
+          <button type="button" onclick="this.closest('tr').remove()" class="text-outline-variant hover:text-red-500 transition-colors">
+            <span class="material-symbols-outlined">delete</span>
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
     }
 
-    const establecimientoId = 1
-    const BASE_URL = window.location.origin + window.location.pathname.replace('abm.html', '')
-
-    async function cargarOperadores() {
-      try {
-        const ops = await api.getOperadores(establecimientoId)
-        const tbody = document.getElementById('tabla-ops')
-        if (!ops.length) {
-          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--text-muted)">Sin operadores registrados</td></tr>'
-          return
-        }
-        tbody.innerHTML = ops.map(op => `
-          <tr>
-            <td>
-              <strong>${op.nombre} ${op.apellido}</strong><br>
-              <small style="color:var(--text-muted)">@${op.username}</small>
-            </td>
-            <td>${op.puesto}</td>
-            <td>
-              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-                <input type="checkbox" ${op.activo ? 'checked' : ''}
-                  onchange="toggleOp(${op.id})"
-                  style="width:16px;height:16px;cursor:pointer;">
-                <span class="badge ${op.activo ? 'badge-green' : 'badge-red'}">
-                  ${op.activo ? 'Activo' : 'Inactivo'}
-                </span>
-              </label>
-            </td>
-            <td>
-              <a href="${API_URL}/operadores/${op.id}/qr?base_url=${BASE_URL}"
-                target="_blank"
-                style="font-size:12px;color:var(--accent);text-decoration:none;">
-                Ver QR
-              </a>
-            </td>
-          </tr>
-        `).join('')
-      } catch (e) {
-        document.getElementById('alert-container').innerHTML =
-          `<div class="alert alert-error">Error al cargar operadores: ${e.message}</div>`
-      }
+    function cerrarSesion() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'loginStaff.html';
     }
-
-    async function toggleOp(id) {
-      try {
-        await api.toggleOperador(id)
-        await cargarOperadores()
-      } catch (e) {
-        document.getElementById('alert-container').innerHTML =
-          `<div class="alert alert-error">${e.message}</div>`
-      }
-    }
-
-    async function agregarOperador() {
-      const nombre = document.getElementById('nuevo-nombre').value.trim()
-      const apellido = document.getElementById('nuevo-apellido').value.trim()
-      const dni = document.getElementById('nuevo-dni').value.trim()
-      const puesto = document.getElementById('nuevo-puesto').value.trim().toUpperCase()
-      const rol = document.getElementById('nuevo-rol').value
-
-      if (!nombre || !apellido || !dni || !puesto) {
-        document.getElementById('alert-form').innerHTML =
-          `<div class="alert alert-error">Completá todos los campos</div>`
-        return
-      }
-
-      const btn = document.getElementById('btn-agregar')
-      btn.disabled = true
-      btn.textContent = 'Agregando...'
-
-      try {
-        const op = await api.crearOperador({
-          nombre, apellido, dni, puesto, rol,
-          establecimiento_id: establecimientoId
-        })
-        document.getElementById('alert-form').innerHTML =
-          `<div class="alert alert-success">
-            ✓ Operador creado correctamente<br>
-            <strong>Usuario:</strong> ${op.username}<br>
-            <strong>Contraseña temporal:</strong> ${nombre.toLowerCase()}${dni.slice(-4)}
-          </div>`
-        document.getElementById('nuevo-nombre').value = ''
-        document.getElementById('nuevo-apellido').value = ''
-        document.getElementById('nuevo-dni').value = ''
-        document.getElementById('nuevo-puesto').value = ''
-        await cargarOperadores()
-      } catch (e) {
-        document.getElementById('alert-form').innerHTML =
-          `<div class="alert alert-error">${e.message}</div>`
-      }
-
-      btn.disabled = false
-      btn.textContent = 'Agregar operador'
-    }
-
-    cargarOperadores()
   </script>
+  <script type="module" src="js/alta-operador.js"></script>
 </body>
 </html>

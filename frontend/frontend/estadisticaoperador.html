@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>TurnoYa - Estadísticas del Día</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#005b9c",
+                        "primary-container": "#2b74b9",
+                        "surface": "#f7f9fc",
+                        "on-surface": "#191c1e",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface-variant": "#414750",
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex">
+
+    <aside class="h-screen w-64 fixed left-0 top-0 bg-[#f2f4f7] flex flex-col py-8 z-50 shadow-lg">
+        <div class="px-8">
+            <h1 class="font-manrope font-black text-[#2B74B9] mb-8 text-2xl tracking-tighter">TurnoYa</h1>
+        </div>
+        <nav class="flex-1 space-y-2 px-2">
+            <a class="flex items-center gap-3 text-slate-600 hover:text-[#2B74B9] px-4 py-3 hover:bg-white/50 rounded-full transition-all group" href="operador.html">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="font-inter text-sm font-medium">Panel Principal</span>
+            </a>
+            <a class="flex items-center gap-3 bg-white text-[#2B74B9] font-bold rounded-full shadow-sm mx-2 px-4 py-3" href="#">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+                <span class="font-inter text-sm font-medium">Estadísticas</span>
+            </a>
+        </nav>
+        <div class="px-4 mt-auto space-y-2">
+            <button onclick="window.print()" class="w-full bg-primary-container text-white py-3 px-6 rounded-full font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity active:scale-95 mb-6">
+                <span class="material-symbols-outlined text-sm">print</span>
+                Imprimir Reporte
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-64 min-h-screen flex flex-col items-center">
+        <header class="flex justify-between items-center w-full max-w-6xl px-8 py-6 bg-[#f7f9fc]">
+            <div>
+                <h2 class="font-manrope text-2xl font-bold tracking-tight">Estadísticas del Día</h2>
+                <p class="text-on-surface-variant text-sm">Monitoreo de flujo en tiempo real.</p>
+            </div>
+        </header>
+
+        <div class="w-full max-w-6xl px-8 pb-12 space-y-8">
+            <div class="flex justify-center">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+                    <div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm border border-slate-100 relative overflow-hidden group">
+                        <span class="text-[10px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">VOLUMEN TOTAL</span>
+                        <div class="flex items-baseline gap-2 mt-2">
+                            <span id="stat-total-atendidos" class="text-5xl font-extrabold font-headline text-primary">0</span>
+                        </div>
+                        <p class="text-sm text-on-surface-variant mt-2">Clientes atendidos hoy</p>
+                    </div>
+
+                    <div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm border border-slate-100 relative overflow-hidden group">
+                        <span class="text-[10px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">VELOCIDAD PROMEDIO</span>
+                        <div class="flex items-baseline gap-2 mt-2">
+                            <span id="stat-tiempo-medio" class="text-5xl font-extrabold font-headline text-primary">12m</span>
+                        </div>
+                        <p class="text-sm text-on-surface-variant mt-2">Minutos por servicio</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center">
+                <div class="w-full max-w-4xl bg-surface-container-lowest p-8 rounded-lg shadow-sm border border-slate-100">
+                    <h3 class="text-xl font-bold font-headline mb-10">Demanda por Servicio</h3>
+                    <div id="contenedor-motivos" class="space-y-8">
+                        </div>
+                </div>
+            </div>
+
+            <section class="space-y-6 w-full max-w-4xl mx-auto">
+                <h3 class="text-xl font-bold font-headline">Últimos Clientes Atendidos</h3>
+                <div class="bg-surface-container-lowest rounded-lg shadow-sm border border-slate-100 overflow-hidden">
+                    <table class="w-full border-collapse text-left">
+                        <thead>
+                            <tr class="bg-slate-50">
+                                <th class="px-8 py-4 text-[10px] font-bold text-on-surface-variant uppercase">TICKET</th>
+                                <th class="px-8 py-4 text-[10px] font-bold text-on-surface-variant uppercase">PUESTO</th>
+                                <th class="px-8 py-4 text-[10px] font-bold text-on-surface-variant uppercase">HORA</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-actividad" class="divide-y divide-slate-100">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+<script type="module">
+    import api from './js/api.js';
+
+    async function cargarMisEstadisticas() {
+        const user = api.getUser();
+        const opId = user.operador_id; 
+
+        if (!opId) return;
+
+        try {
+            const data = await api.request('GET', `/estadisticas/operador/${opId}/hoy`, null, api.getToken());
+
+            // 1. Números Principales
+            document.getElementById('stat-total-atendidos').innerText = data.atendidos ?? 0;
+            document.getElementById('stat-tiempo-medio').innerText = (data.promedio_minutos ?? 0) + 'm';
+            
+            // 2. Tabla de Actividad (Últimos Clientes)
+            const tabla = document.getElementById('tabla-actividad');
+            if (tabla && data.ultimos) {
+                tabla.innerHTML = data.ultimos.map(t => `
+                    <tr class="hover:bg-slate-50 transition-colors border-b border-slate-50">
+                        <td class="px-8 py-4 font-bold text-primary">${t.codigo}</td>
+                        <td class="px-8 py-4 text-sm">${t.motivo}</td>
+                        <td class="px-8 py-4 text-sm text-slate-500">${t.hora} hs</td>
+                    </tr>
+                `).join('') || '<tr><td colspan="3" class="p-4 text-center text-slate-400">Sin actividad hoy</td></tr>';
+            }
+
+            // 3. Barras de Motivos (Demanda por Servicio)
+            const cont = document.getElementById('contenedor-motivos');
+            if (cont && data.motivos) {
+                const total = Object.values(data.motivos).reduce((a, b) => a + b, 0) || 1;
+                const entries = Object.entries(data.motivos);
+                
+                if (entries.length === 0) {
+                    cont.innerHTML = '<p class="text-slate-400 italic text-sm">No hay datos de servicios hoy.</p>';
+                } else {
+                    cont.innerHTML = entries.map(([nombre, cant]) => {
+                        const porcentaje = Math.round((cant / total) * 100);
+                        return `
+                            <div class="mb-6">
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="font-semibold text-slate-700">${nombre}</span>
+                                    <span class="font-bold text-primary">${cant}</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-primary h-full rounded-full transition-all duration-1000" style="width:${porcentaje}%"></div>
+                                </div>
+                            </div>`;
+                    }).join('');
+                }
+            }
+        } catch (error) {
+            console.error("Error cargando estadísticas completas:", error);
+        }
+    }
+
+    window.onload = cargarMisEstadisticas;
+</script>
+</body>
+</html>

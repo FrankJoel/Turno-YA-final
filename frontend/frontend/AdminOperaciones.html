@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>TurnoYa | Monitor de Operaciones</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { "primary":"#2B74B9", "surface":"#f7f9fc" }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family:'Inter', sans-serif; }
+    .font-headline { font-family:'Manrope', sans-serif; }
+    .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+     /* Nav item activo */
+        /* Nav item activo */
+  .nav-link.active {
+    background-color: #2B74B9;
+    color: white !important;
+  }
+  .nav-link.active .material-symbols-outlined {
+    color: white;
+    
+  }
+  .nav-link.active {
+  background-color: #2B74B9 !important;
+  color: white !important;
+}
+.nav-link.active .material-symbols-outlined {
+  color: white !important;
+}
+.nav-link.active:hover {
+  background-color: #2B74B9 !important;
+}
+  </style>
+</head>
+
+<body class="bg-surface text-slate-900 overflow-hidden">
+
+  <aside class="h-full w-72 fixed left-0 top-0 bg-[#f2f4f7] flex flex-col py-8 border-r border-slate-200 z-50">
+    <div class="px-8 mb-12 flex items-center gap-3">
+      <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+        <span class="material-symbols-outlined text-white">confirmation_number</span>
+      </div>
+      <h1 class="text-2xl font-black text-primary font-headline">TurnoYa</h1>
+    </div>
+<nav class="h-full w-72 fixed left-0 top-0 flex flex-col py-8 bg-[#f2f4f7] z-50 border-r border-slate-200">
+
+  <!-- Logo (ícono ahora en azul bg-[#2B74B9]) -->
+  <div class="px-8 mb-12 flex items-center gap-3">
+    <div class="w-10 h-10 bg-[#2B74B9] rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+      <span class="material-symbols-outlined text-white">confirmation_number</span>
+    </div>
+    <span class="text-2xl font-black text-[#2B74B9]">TurnoYa</span>
+  </div>
+
+  <!-- Links de navegación -->
+  <div class="flex-1 flex flex-col gap-2">
+    <a href="AdminOperaciones.html" id="nav-operaciones"
+       class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span>Operaciones</span>
+    </a>
+    <a href="estadisticasAdmin.html" id="nav-estadisticas"
+       class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
+      <span class="material-symbols-outlined">monitoring</span>
+      <span>Estadísticas</span>
+    </a>
+    <a href="AdminGestionUser.html" id="nav-usuarios"
+       class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
+      <span class="material-symbols-outlined">group</span>
+      <span>Gestión de Usuarios</span>
+    </a>
+    <a href="admin_configuracion.html" id="nav-config"
+       class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
+      <span class="material-symbols-outlined">settings</span>
+      <span>Configuración</span>
+    </a>
+  </div>
+
+  <!-- Usuario + logout -->
+  <div class="px-4 mt-auto space-y-3">
+    <div class="p-4 bg-white rounded-2xl flex items-center gap-3 shadow-sm border border-slate-100">
+      <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#2B74B9] font-bold" id="admin-initials">AD</div>
+      <div class="overflow-hidden">
+        <p class="text-sm font-black truncate" id="admin-nombre">Admin</p>
+        <p class="text-[10px] text-slate-400 font-bold uppercase">Administrador</p>
+      </div>
+    </div>
+    <button onclick="cerrarSesion()" class="w-full flex items-center gap-3 text-red-400 hover:text-red-600 px-4 py-3 hover:bg-red-50 rounded-full transition-all">
+      <span class="material-symbols-outlined">logout</span>
+      <span class="font-bold text-sm">Cerrar sesión</span>
+    </button>
+  </div>
+</nav>
+    <div class="px-6 mt-auto">
+      <button onclick="cerrarSesion()" class="w-full flex items-center gap-3 text-red-400 hover:text-red-600 px-4 py-3 hover:bg-red-50 rounded-full transition-all">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="font-bold text-sm">Cerrar sesión</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="ml-72 flex flex-col h-screen">
+
+    <header class="h-20 bg-white/80 backdrop-blur-md flex items-center justify-between px-10 border-b border-slate-100">
+      <h2 class="text-xl font-bold font-headline text-slate-800">Monitor de Operaciones</h2>
+      <div class="flex items-center gap-4">
+        <span class="text-[10px] bg-green-100 text-green-600 px-3 py-1 rounded-full font-black uppercase animate-pulse">En Vivo</span>
+        <div class="h-8 w-px bg-slate-200"></div>
+        <p id="fecha-actual" class="text-xs font-bold text-slate-500 uppercase"></p>
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-8 space-y-8">
+
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <p class="text-[10px] font-black text-slate-400 uppercase mb-2">Turnos en Espera</p>
+          <h3 id="espera-total" class="text-4xl font-black text-primary">--</h3>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <p class="text-[10px] font-black text-slate-400 uppercase mb-2">Tiempo Estimado</p>
+          <h3 class="text-4xl font-black text-slate-800">~10 min</h3>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <p class="text-[10px] font-black text-slate-400 uppercase mb-2">Operadores Conectados</p>
+          <h3 id="monitor-contadores-top" class="text-4xl font-black text-slate-800">--/--</h3>
+        </div>
+      </section>
+
+      <section class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="px-8 py-5 border-b border-slate-50 bg-slate-50/30 flex justify-between items-center">
+          <span class="text-xs font-black text-slate-500 uppercase tracking-widest">Estatus de Módulos</span>
+        </div>
+        <div class="grid grid-cols-12 px-8 py-3 bg-white text-[10px] font-black text-slate-400 uppercase tracking-tighter border-b border-slate-50">
+          <div class="col-span-5">Operador</div>
+          <div class="col-span-3">Puesto</div>
+          <div class="col-span-4 text-right">Estado</div>
+        </div>
+        <div id="monitor-operadores-body" class="divide-y divide-slate-50 min-h-[300px]">
+          <div class="p-20 text-center">
+            <p class="text-slate-300 font-medium">Cargando operadores...</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    const opciones = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+    document.getElementById('fecha-actual').innerText = new Date().toLocaleDateString('es-ES', opciones);
+  // Marca el link activo según el archivo HTML actual
+  const page = window.location.pathname.split('/').pop() || 'index.html';
+  const map = {
+    'AdminOperaciones.html':   'nav-operaciones',
+    'estadisticasAdmin.html':  'nav-estadisticas',
+    'AdminGestionUser.html':   'nav-usuarios',
+    'admin_configuracion.html':'nav-config',
+  };
+  const activeId = map[page];
+  if (activeId) {
+    document.getElementById(activeId)?.classList.add('active');
+  }
+    function cerrarSesion() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'loginStaff.html';
+    }
+  </script>
+  <script type="module" src="js/monitor-operaciones.js"></script>
+</body>
+</html>

@@ -1,130 +1,275 @@
 <!DOCTYPE html>
-<html lang="es">
+<html class="h-full" lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TurnoYa — Pantalla</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: #0A1628;
-      color: #fff;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    .tv-header {
-      background: #1F4E79;
-      padding: 20px 40px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .tv-logo { font-size: 28px; font-weight: 700; }
-    .tv-logo span { color: #7BC8F6; }
-    .tv-subtitle { font-size: 14px; opacity: 0.7; }
-    .tv-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 40px;
-      padding: 40px;
-    }
-    .tv-current {
-      background: #fff;
-      color: #1F4E79;
-      border-radius: 20px;
-      padding: 32px 80px;
-      text-align: center;
-    }
-    .tv-current-label { font-size: 18px; color: #888; margin-bottom: 8px; }
-    .tv-current-code { font-size: 96px; font-weight: 700; letter-spacing: 4px; line-height: 1; }
-    .tv-next-label { font-size: 16px; color: #7BC8F6; margin-bottom: 8px; }
-    .tv-next-code { font-size: 36px; font-weight: 600; color: #fff; }
-    .tv-queue {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .tv-queue-item {
-      background: rgba(255,255,255,0.08);
-      border-radius: 12px;
-      padding: 12px 24px;
-      font-size: 20px;
-      color: rgba(255,255,255,0.5);
-    }
-    .tv-time {
-      font-size: 14px;
-      color: rgba(255,255,255,0.4);
-      position: absolute;
-      bottom: 20px;
-      right: 40px;
-    }
-  </style>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>TurnoYa - Display TV</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary":"#4a607c","outline":"#717782",
+                        "secondary-container":"#c5dcfd","on-secondary-container":"#4b617d",
+                        "surface":"#f7f9fc","on-surface":"#191c1e",
+                        "surface-container-lowest":"#ffffff","surface-container-low":"#f2f4f7",
+                        "on-surface-variant":"#414750","primary":"#005b9c","primary-container":"#2b74b9",
+                        "tertiary":"#824c00","tertiary-fixed":"#ffdcbd",
+                        "on-tertiary-container":"#fff5ee","outline-variant":"#c1c7d2",
+                    },
+                    fontFamily:{ headline:["Manrope"], body:["Inter"], label:["Inter"] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+        @keyframes fadeIn  { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:scale(1)} }
+        @keyframes blink   { 0%,100%{opacity:1} 50%{opacity:0.2} }
+        .animate-fadein    { animation:fadeIn 0.5s ease-out; }
+        .animate-blink     { animation:blink 1.2s ease-in-out infinite; }
+    </style>
 </head>
-<body>
-  <div class="tv-header">
-    <div>
-      <div class="tv-logo">Turno<span>YA</span></div>
-      <div class="tv-subtitle">Sala de Espera Virtual</div>
-    </div>
-    <div id="tv-time" style="font-size:24px; opacity:0.8;"></div>
-  </div>
 
-  <div class="tv-body">
-    <div class="tv-current">
-      <div class="tv-current-label">Turno actual</div>
-      <div class="tv-current-code" id="turno-actual">—</div>
-    </div>
+<body class="bg-surface text-on-surface font-body h-screen overflow-hidden flex flex-col">
 
-    <div style="text-align:center;">
-      <div class="tv-next-label">Siguiente turno</div>
-      <div class="tv-next-code" id="turno-siguiente">—</div>
-    </div>
+    <main class="flex-1 flex flex-row p-8 gap-8 overflow-hidden">
+        <section class="flex-[1.2] flex flex-col gap-6">
+            <div class="flex-1 bg-surface-container-lowest rounded-xl shadow-[0_20px_40px_rgba(25,28,30,0.06)] flex flex-col items-center justify-center relative overflow-hidden">
+                <div class="absolute top-8 left-8 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-xl">confirmation_number</span>
+                    </div>
+                    <span class="font-headline font-black text-primary text-2xl tracking-tighter">TurnoYa</span>
+                </div>
 
-    <div class="tv-queue" id="tv-queue"></div>
-  </div>
+                <div class="text-center px-8">
+                    <span id="label-estado" class="block font-label text-secondary font-bold uppercase tracking-[0.2em] mb-3 text-lg">Esperando...</span>
+                    <h1 id="turno-grande" class="font-headline font-extrabold text-primary leading-none tracking-tighter select-none text-[9rem]">---</h1>
+                    <div class="flex items-center justify-center gap-3 mt-4">
+                        <span id="puesto-grande" class="px-6 py-2 bg-secondary-container text-on-secondary-container rounded-full font-headline font-bold text-xl">---</span>
+                        <span id="dot-estado" class="w-3 h-3 rounded-full hidden bg-green-500"></span>
+                    </div>
+                </div>
+                <div class="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-primary-container"></div>
+            </div>
 
-  <script src="js/api.js"></script>
-  <script>
-    const params = new URLSearchParams(window.location.search)
-    const operadorId = params.get('op')
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm p-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="material-symbols-outlined text-primary text-xl">history</span>
+                    <h3 class="font-headline font-extrabold text-on-surface text-lg">Últimos llamados</h3>
+                </div>
+                <div id="historial-lista" class="grid grid-cols-3 gap-3">
+                    <p class="col-span-3 text-center text-outline text-sm py-3">Sin actividad</p>
+                </div>
+            </div>
+        </section>
 
-    async function cargarCola() {
-      if (!operadorId) return
-      try {
-        const cola = await api.getCola(operadorId)
-        const atendiendo = cola.find(t => t.estado === 'atendiendo')
-        const esperando = cola.filter(t => t.estado === 'esperando')
+        <section class="flex-1 flex flex-col">
+            <div class="bg-surface-container-low p-8 rounded-xl flex flex-col h-full">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="font-headline font-extrabold text-on-surface text-3xl tracking-tight">Próximos en espera</h2>
+                    <span id="ws-status" class="text-[10px] bg-slate-100 text-slate-400 px-3 py-1 rounded-full font-bold uppercase">Iniciando...</span>
+                </div>
 
-        document.getElementById('turno-actual').textContent =
-          atendiendo ? atendiendo.codigo : '—'
-        document.getElementById('turno-siguiente').textContent =
-          esperando[0] ? esperando[0].codigo : '—'
+                <div id="cola-espera" class="flex flex-col gap-4 flex-1 overflow-y-auto">
+                    <div class="text-center text-outline py-10">
+                        <span class="material-symbols-outlined text-5xl mb-3 block">group</span>
+                        <p class="text-lg font-bold">No hay turnos en fila</p>
+                    </div>
+                </div>
 
-        const queueEl = document.getElementById('tv-queue')
-        queueEl.innerHTML = esperando.slice(1, 5).map(t =>
-          `<div class="tv-queue-item">${t.codigo}</div>`
-        ).join('')
-      } catch (e) { console.error(e) }
-    }
+                <div class="mt-6 bg-primary/5 rounded-lg p-5 flex items-center gap-4">
+                    <div class="bg-white p-2 rounded-md">
+                        <span class="material-symbols-outlined text-primary text-4xl">qr_code_2</span>
+                    </div>
+                    <div>
+                        <p class="font-body font-bold text-primary text-lg">Escanea el QR</p>
+                        <p class="text-on-surface-variant">para unirte a la fila</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
 
-    function actualizarHora() {
-      const now = new Date()
-      document.getElementById('tv-time').textContent =
-        now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
-    }
+    <footer class="bg-surface-container-lowest px-10 py-5 flex items-center justify-between shadow-sm z-10">
+        <div class="flex items-center gap-10">
+            <div class="flex items-baseline gap-2">
+                <span id="reloj-hora" class="font-headline font-extrabold text-on-surface text-4xl">--:--</span>
+                <span id="reloj-ampm" class="font-label font-bold text-outline text-lg uppercase">--</span>
+            </div>
+            <div class="h-8 w-[2px] bg-outline-variant"></div>
+            <div>
+                <span id="reloj-fecha" class="font-headline font-bold text-on-surface text-lg block">--</span>
+                <span class="text-outline">Sede Central</span>
+            </div>
+        </div>
+        <div class="flex-1 max-w-2xl px-10">
+            <div class="flex items-center gap-3 bg-tertiary-fixed text-on-tertiary-container px-6 py-3 rounded-full">
+                <span class="material-symbols-outlined text-tertiary">lightbulb</span>
+                <p class="font-body font-semibold text-lg">Tip: Tené tu identificación a mano.</p>
+            </div>
+        </div>
+    </footer>
 
-    api.conectarWS(operadorId, () => cargarCola())
-    cargarCola()
-    actualizarHora()
-    setInterval(actualizarHora, 1000)
-    setInterval(cargarCola, 15000)
-  </script>
+    <script>
+        const API = 'http://localhost:8000';
+        let operadoresActivos = [];
+
+        function actualizarReloj() {
+            const ahora = new Date();
+            let h = ahora.getHours();
+            const m = String(ahora.getMinutes()).padStart(2,'0');
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            document.getElementById('reloj-hora').innerText = `${h}:${m}`;
+            document.getElementById('reloj-ampm').innerText = ampm;
+            const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+            document.getElementById('reloj-fecha').innerText = ahora.toLocaleDateString('es-AR', opts);
+        }
+        setInterval(actualizarReloj, 1000);
+        actualizarReloj();
+
+        async function sincronizarEstado() {
+            try {
+                let turnoPrincipal = null;
+                let todosLosEnEspera = [];
+                let todosLosAtendiendo = [];
+
+                for (const op of operadoresActivos) {
+                    // 1. Cambiamos a la ruta exacta de tu backend: estado_actual
+                    const resA = await fetch(`${API}/turnos/estado_actual/${op.id}`);
+                    const atendiendo = await resA.json();
+                    
+                    if (atendiendo && atendiendo.codigo) {
+                        const tObj = { ...atendiendo, nombreOp: op.nombre };
+                        todosLosAtendiendo.push(tObj);
+                        if (!turnoPrincipal || tObj.estado === 'llamando') {
+                            turnoPrincipal = tObj;
+                        }
+                    }
+
+                    // 2. Obtener Cola
+                    const resC = await fetch(`${API}/turnos/cola/${op.id}`);
+                    const cola = await resC.json();
+                    if (Array.isArray(cola)) {
+                        cola.forEach(t => todosLosEnEspera.push({ ...t, nombreOp: op.nombre }));
+                    }
+                }
+                renderPantalla(turnoPrincipal, todosLosAtendiendo, todosLosEnEspera);
+            } catch (e) { console.error("Error sincronizando:", e); }
+        }
+
+        function renderPantalla(principal, atendiendo, espera) {
+            const tG = document.getElementById('turno-grande');
+            const lE = document.getElementById('label-estado');
+            const pG = document.getElementById('puesto-grande');
+            const dot = document.getElementById('dot-estado');
+
+            if (principal) {
+                tG.innerText = principal.codigo;
+                pG.innerText = principal.nombreOp;
+                dot.classList.remove('hidden');
+                tG.classList.remove('animate-blink');
+
+                if (principal.estado === 'llamando') {
+                    tG.style.color = '#f59e0b';
+                    tG.classList.add('animate-blink');
+                    lE.innerText = '🔔 Llamando...';
+                    dot.className = 'w-3 h-3 rounded-full bg-amber-500 animate-pulse';
+                } else {
+                    tG.style.color = '#005b9c';
+                    lE.innerText = '✂️ Atendiendo Ahora';
+                    dot.className = 'w-3 h-3 rounded-full bg-green-500';
+                }
+            } else {
+                tG.innerText = "---";
+                pG.innerText = "---";
+                lE.innerText = "Atendiendo Ahora";
+                dot.classList.add('hidden');
+                tG.style.color = '';
+            }
+
+            const hLista = document.getElementById('historial-lista');
+            if (atendiendo.length === 0) {
+                hLista.innerHTML = '<p class="col-span-3 text-center text-outline text-sm py-3">Sin actividad</p>';
+            } else {
+                hLista.innerHTML = atendiendo.slice(0, 6).map(t => `
+                    <div class="bg-surface-container-low rounded-xl p-3 text-center border-l-4 ${t.estado === 'llamando' ? 'border-amber-500' : 'border-green-500'}">
+                        <p class="font-headline font-black text-primary text-lg">${t.codigo}</p>
+                        <p class="text-[9px] text-outline uppercase font-bold truncate">${t.nombreOp}</p>
+                    </div>
+                `).join('');
+            }
+
+            const cLista = document.getElementById('cola-espera');
+            if (espera.length === 0) {
+                cLista.innerHTML = '<div class="text-center text-outline py-10"><p class="text-lg font-bold">No hay turnos en fila</p></div>';
+            } else {
+                cLista.innerHTML = espera.map(t => `
+                    <div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm flex justify-between items-center animate-fadein">
+                        <span class="font-headline font-bold text-primary text-2xl">${t.codigo}</span>
+                        <div class="text-right"><span class="font-body text-secondary text-lg block">${t.nombreOp}</span></div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function conectarWS(op) {
+            const wsBase = API.replace(/^http/, 'ws');
+            const ws = new WebSocket(`${wsBase}/ws/${op.id}`);
+
+            ws.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                // Mapeo de eventos según tu turno.py
+                const eventosValidos = ['siguiente_turno', 'turno_atendiendo', 'turno_finalizado', 'turno_cancelado', 'nuevo_turno'];
+                
+                if (eventosValidos.includes(data.evento)) {
+                    if (data.evento === 'siguiente_turno') reproducirSonido();
+                    sincronizarEstado();
+                }
+            };
+            ws.onclose = () => setTimeout(() => conectarWS(op), 3000);
+        }
+
+        function setStatus(msg, ok) {
+            const el = document.getElementById('ws-status');
+            el.innerText = msg;
+            el.className = `text-[10px] px-3 py-1 rounded-full font-bold uppercase ${ok ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'}`;
+        }
+
+        async function iniciar() {
+            try {
+                const res = await fetch(`${API}/operadores/?establecimiento_id=1`);
+                const todos = await res.json();
+                operadoresActivos = todos.filter(op => op.activo && op.rol !== 'admin');
+                
+                if (operadoresActivos.length > 0) {
+                    setStatus(`${operadoresActivos.length} activos`, true);
+                    await sincronizarEstado();
+                    operadoresActivos.forEach(conectarWS);
+                } else {
+                    setStatus('Sin operadores', false);
+                }
+            } catch (e) {
+                setStatus('Error de conexión', false);
+                setTimeout(iniciar, 5000);
+            }
+        }
+
+        function reproducirSonido() {
+            try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(()=>{}); } catch(e){}
+        }
+
+        document.body.addEventListener('click', () => {
+            const a = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+            a.volume = 0; a.play().then(() => a.pause());
+        }, { once: true });
+
+        iniciar();
+    </script>
 </body>
 </html>

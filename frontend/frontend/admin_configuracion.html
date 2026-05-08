@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>TurnoYa | Configuración del Local</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "surface-container-lowest":"#ffffff",
+            "surface-container-low":"#f2f4f7",
+            "surface-container-high":"#e6e8eb",
+            "on-surface":"#191c1e",
+            "on-surface-variant":"#414750",
+            "primary":"#005b9c",
+            "primary-container":"#2b74b9",
+            "surface":"#f7f9fc",
+          },
+          borderRadius: { DEFAULT:"1rem", lg:"2rem", xl:"3rem" }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family:'Inter', sans-serif; background-color:#f7f9fc; }
+    h1, h2, h3 { font-family:'Manrope', sans-serif; }
+    .material-symbols-outlined { vertical-align:middle; }
+      /* Nav item activo */
+      /* Nav item activo */
+  .nav-link.active {
+    background-color: #2B74B9;
+    color: white !important;
+  }
+  .nav-link.active .material-symbols-outlined {
+    color: white;
+    
+  }
+  .nav-link.active {
+  background-color: #2B74B9 !important;
+  color: white !important;
+}
+.nav-link.active .material-symbols-outlined {
+  color: white !important;
+}
+.nav-link.active:hover {
+  background-color: #2B74B9 !important;
+}
+  </style>
+</head>
+
+<body class="text-on-surface overflow-x-hidden">
+
+<nav class="h-full w-72 fixed left-0 top-0 flex flex-col py-8 bg-[#f2f4f7] z-50 border-r border-slate-200">
+
+  <!-- Logo (ícono ahora en azul bg-[#2B74B9]) -->
+  <div class="px-8 mb-12 flex items-center gap-3">
+    <div class="w-10 h-10 bg-[#2B74B9] rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+      <span class="material-symbols-outlined text-white">confirmation_number</span>
+    </div>
+    <span class="text-2xl font-black text-[#2B74B9]">TurnoYa</span>
+  </div>
+
+  <!-- Links de navegación -->
+  <div class="flex-1 flex flex-col gap-2">
+    <a href="AdminOperaciones.html" id="nav-operaciones"
+       class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span>Operaciones</span>
+    </a>
+    <a href="estadisticasAdmin.html" id="nav-estadisticas"
+       class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
+      <span class="material-symbols-outlined">monitoring</span>
+      <span>Estadísticas</span>
+    </a>
+    <a href="AdminGestionUser.html" id="nav-usuarios"
+       class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
+      <span class="material-symbols-outlined">group</span>
+      <span>Gestión de Usuarios</span>
+    </a>
+    <a href="admin_configuracion.html" id="nav-config"
+       class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
+      <span class="material-symbols-outlined">settings</span>
+      <span>Configuración</span>
+    </a>
+  </div>
+
+  <!-- Usuario + logout -->
+  <div class="px-4 mt-auto space-y-3">
+    <div class="p-4 bg-white rounded-2xl flex items-center gap-3 shadow-sm border border-slate-100">
+      <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#2B74B9] font-bold" id="admin-initials">AD</div>
+      <div class="overflow-hidden">
+        <p class="text-sm font-black truncate" id="admin-nombre">Admin</p>
+        <p class="text-[10px] text-slate-400 font-bold uppercase">Administrador</p>
+      </div>
+    </div>
+    <button onclick="cerrarSesion()" class="w-full flex items-center gap-3 text-red-400 hover:text-red-600 px-4 py-3 hover:bg-red-50 rounded-full transition-all">
+      <span class="material-symbols-outlined">logout</span>
+      <span class="font-bold text-sm">Cerrar sesión</span>
+    </button>
+  </div>
+</nav>
+  <main class="ml-72 pt-20 px-10 pb-12 min-h-screen">
+    
+    <header class="mb-10">
+      <h1 class="text-4xl font-extrabold tracking-tight mb-2">Personalización del Molde</h1>
+      <p class="text-on-surface-variant">Adaptá la plataforma a las necesidades de tu negocio.</p>
+    </header>
+
+    <div class="grid grid-cols-12 gap-8">
+      
+      <section class="col-span-12 lg:col-span-5 space-y-6">
+        <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+          <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">store</span> Datos del Local
+          </h3>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Nombre de la Tienda</label>
+              <input type="text" placeholder="Ej: Barbería El Estilo" class="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 focus:ring-2 focus:ring-primary/20">
+            </div>
+            <div>
+              <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Rubro / Categoría</label>
+              <select class="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 focus:ring-2 focus:ring-primary/20">
+                <option>Salud / Farmacia</option>
+                <option>Estética / Peluquería</option>
+                <option>Gastronomía</option>
+                <option>Atención al Cliente General</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-primary/5 p-8 rounded-3xl border border-primary/10">
+          <h3 class="font-bold text-primary mb-2">Tip de Molde</h3>
+          <p class="text-sm text-primary-container leading-relaxed">Configurar el rubro ajustará automáticamente los términos del sistema (ej: "Paciente" en Salud, "Cliente" en Comercio).</p>
+        </div>
+      </section>
+
+      <section class="col-span-12 lg:col-span-7">
+        <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+          <div class="flex justify-between items-center mb-8">
+            <h3 class="text-lg font-bold flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">category</span> Servicios Disponibles
+            </h3>
+            <button class="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
+              <span class="material-symbols-outlined text-sm">add</span> Añadir nuevo
+            </button>
+          </div>
+
+          <div class="space-y-3" id="lista-servicios">
+            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-primary shadow-sm">
+                  <span class="material-symbols-outlined">content_cut</span>
+                </div>
+                <div>
+                  <p class="font-bold text-sm text-on-surface">Corte de Cabello</p>
+                  <p class="text-[10px] text-slate-400 font-bold uppercase">Asignado a: Todos los puestos</p>
+                </div>
+              </div>
+              <button class="text-slate-400 hover:text-red-500 transition-colors">
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-primary shadow-sm">
+                  <span class="material-symbols-outlined">clean_hands</span>
+                </div>
+                <div>
+                  <p class="font-bold text-sm text-on-surface">Manicura / Uñas</p>
+                  <p class="text-[10px] text-slate-400 font-bold uppercase">Asignado a: Puesto 4, Puesto 5</p>
+                </div>
+              </div>
+              <button class="text-slate-400 hover:text-red-500 transition-colors">
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-10 pt-6 border-t border-slate-100 flex justify-end">
+            <button class="bg-primary text-white px-10 py-4 rounded-full font-bold shadow-lg shadow-blue-500/20 hover:scale-[1.02] transition-transform">
+              Guardar Configuración
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+<script>
+  // Marca el link activo según el archivo HTML actual
+  const page = window.location.pathname.split('/').pop() || 'index.html';
+  const map = {
+    'AdminOperaciones.html':   'nav-operaciones',
+    'estadisticasAdmin.html':  'nav-estadisticas',
+    'AdminGestionUser.html':   'nav-usuarios',
+    'admin_configuracion.html':'nav-config',
+  };
+  const activeId = map[page];
+  if (activeId) {
+    document.getElementById(activeId)?.classList.add('active');
+  }
+</script>
+</body>
+</html>

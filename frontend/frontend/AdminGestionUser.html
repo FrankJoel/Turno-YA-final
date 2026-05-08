@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>TurnoYa | Gestión de Usuarios</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode:"class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-container-lowest":"#ffffff",
+            "surface-container-low":"#f2f4f7",
+            "surface-container-high":"#e6e8eb",
+            "on-surface":"#191c1e",
+            "on-surface-variant":"#414750",
+            "outline-variant":"#c1c7d2",
+            "primary":"#005b9c",
+            "primary-container":"#2b74b9",
+            "on-primary":"#ffffff",
+            "surface":"#f7f9fc",
+          },
+          borderRadius: { DEFAULT:"1rem", lg:"2rem", xl:"3rem", full:"9999px" },
+          fontFamily: { headline:["Manrope"], body:["Inter"] }
+        }
+      }
+    }
+  </script>
+ <style>
+    body { font-family:'Inter', sans-serif; }
+    .font-headline { font-family:'Manrope', sans-serif; }
+    .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+     /* Nav item activo */
+       /* Nav item activo */
+  .nav-link.active {
+    background-color: #2B74B9;
+    color: white !important;
+  }
+  .nav-link.active .material-symbols-outlined {
+    color: white;
+    
+  }
+  .nav-link.active {
+  background-color: #2B74B9 !important;
+  color: white !important;
+}
+.nav-link.active .material-symbols-outlined {
+  color: white !important;
+}
+.nav-link.active:hover {
+  background-color: #2B74B9 !important;
+}
+  </style>
+</head>
+
+<body class="text-on-surface overflow-x-hidden">
+
+<nav class="h-full w-72 fixed left-0 top-0 flex flex-col py-8 bg-[#f2f4f7] z-50 border-r border-slate-200">
+
+  <!-- Logo (ícono ahora en azul bg-[#2B74B9]) -->
+  <div class="px-8 mb-12 flex items-center gap-3">
+    <div class="w-10 h-10 bg-[#2B74B9] rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
+      <span class="material-symbols-outlined text-white">confirmation_number</span>
+    </div>
+    <span class="text-2xl font-black text-[#2B74B9]">TurnoYa</span>
+  </div>
+
+  <!-- Links de navegación -->
+  <div class="flex-1 flex flex-col gap-2">
+    <a href="AdminOperaciones.html" id="nav-operaciones"
+       class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span>Operaciones</span>
+    </a>
+    <a href="estadisticasAdmin.html" id="nav-estadisticas"
+       class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
+      <span class="material-symbols-outlined">monitoring</span>
+      <span>Estadísticas</span>
+    </a>
+    <a href="AdminGestionUser.html" id="nav-usuarios"
+       class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
+      <span class="material-symbols-outlined">group</span>
+      <span>Gestión de Usuarios</span>
+    </a>
+    <a href="admin_configuracion.html" id="nav-config"
+       class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
+      <span class="material-symbols-outlined">settings</span>
+      <span>Configuración</span>
+    </a>
+  </div>
+
+  <!-- Usuario + logout -->
+  <div class="px-4 mt-auto space-y-3">
+    <div class="p-4 bg-white rounded-2xl flex items-center gap-3 shadow-sm border border-slate-100">
+      <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#2B74B9] font-bold" id="admin-initials">AD</div>
+      <div class="overflow-hidden">
+        <p class="text-sm font-black truncate" id="admin-nombre">Admin</p>
+        <p class="text-[10px] text-slate-400 font-bold uppercase">Administrador</p>
+      </div>
+    </div>
+    <button onclick="cerrarSesion()" class="w-full flex items-center gap-3 text-red-400 hover:text-red-600 px-4 py-3 hover:bg-red-50 rounded-full transition-all">
+      <span class="material-symbols-outlined">logout</span>
+      <span class="font-bold text-sm">Cerrar sesión</span>
+    </button>
+  </div>
+</nav>
+  <main class="ml-72 pt-28 px-10 pb-12 min-h-screen">
+
+    <section class="flex justify-between items-end mb-10">
+      <div>
+        <h1 class="text-4xl font-extrabold text-on-surface tracking-tight mb-2">Gestión de Usuarios</h1>
+        <p class="text-on-surface-variant font-body">Administrá operadores y el acceso a la plataforma.</p>
+      </div>
+      <button onclick="window.location.href='abm.html'"
+              class="flex items-center gap-2 bg-gradient-to-r from-primary to-primary-container text-white px-8 py-4 rounded-full font-bold shadow-xl shadow-blue-500/30 hover:scale-[1.02] transition-transform">
+        <span class="material-symbols-outlined">person_add</span>
+        Añadir Operador
+      </button>
+    </section>
+
+    <section class="grid grid-cols-12 gap-6 mb-12">
+      <div class="col-span-12 bg-surface-container-lowest p-8 rounded-lg shadow-sm flex items-center justify-between">
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Total Personal Operativo</span>
+          <span id="stat-total" class="text-5xl font-black text-on-surface">--</span>
+        </div>
+        <div class="flex gap-4">
+          <div class="flex flex-col items-center p-4 bg-green-50 rounded-2xl min-w-[100px]">
+            <span id="stat-activos" class="text-green-600 font-bold text-xl">--</span>
+            <span class="text-[10px] text-green-700 uppercase font-black">Activos</span>
+          </div>
+          <div class="flex flex-col items-center p-4 bg-slate-100 rounded-2xl min-w-[100px]">
+            <span id="stat-inactivos" class="text-slate-600 font-bold text-xl">--</span>
+            <span class="text-[10px] text-slate-500 uppercase font-black">Inactivos</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-surface-container-low rounded-lg p-1 overflow-hidden">
+      <div class="bg-surface-container-lowest rounded-[1.8rem] overflow-hidden">
+        <div class="grid grid-cols-12 gap-4 px-8 py-6 border-b border-surface-container-high text-xs font-black uppercase tracking-widest text-slate-400">
+          <div class="col-span-4">Nombre del Operador</div>
+          <div class="col-span-3">Nombre de Usuario</div>
+          <div class="col-span-2">Estado</div>
+          <div class="col-span-3 text-right">Acciones</div>
+        </div>
+        <div id="lista-operadores-container">
+          <div class="px-8 py-10 text-center text-slate-400 italic">Cargando operadores...</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="mt-8 flex justify-between items-center px-4">
+      <span id="contador-footer" class="text-sm text-slate-500">--</span>
+    </div>
+  </main>
+
+  <script>
+      // Marca el link activo según el archivo HTML actual
+  const page = window.location.pathname.split('/').pop() || 'index.html';
+  const map = {
+    'AdminOperaciones.html':   'nav-operaciones',
+    'estadisticasAdmin.html':  'nav-estadisticas',
+    'AdminGestionUser.html':   'nav-usuarios',
+    'admin_configuracion.html':'nav-config',
+  };
+  const activeId = map[page];
+  if (activeId) {
+    document.getElementById(activeId)?.classList.add('active');
+  }
+    function cerrarSesion() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'loginStaff.html';
+    }
+  </script>
+  <script type="module" src="js/gestion-usuarios.js"></script>
+</body>
+</html>

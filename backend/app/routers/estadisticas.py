@@ -1,3 +1,4 @@
+#router/estadisticas.py
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -23,14 +24,25 @@ def calcular_metricas(turnos):
     motivos = {}
     for t in atendidos:
         motivos[t.motivo] = motivos.get(t.motivo, 0) + 1
+
+    # --- AGREGAMOS ESTO: Los últimos 12 tickets ---
+    ultimos = []
+    # Ordenamos por hora de atención de forma descendente
+    atendidos_sorted = sorted(atendidos, key=lambda x: x.hora_atencion or x.hora_entrada, reverse=True)[:12]
+    for t in atendidos_sorted:
+        ultimos.append({
+            "codigo": t.codigo,
+            "motivo": t.motivo,
+            "hora": t.hora_atencion.strftime("%H:%M") if t.hora_atencion else "--:--"
+        })
         
     return {
         "atendidos": len(atendidos),
         "cancelados": len(cancelados),
         "promedio_minutos": prom,
-        "motivos": motivos
+        "motivos": motivos,
+        "ultimos": ultimos # <--- Ahora enviamos los tickets
     }
-
 # --- ENDPOINTS ---
 
 @router.get("/{establecimiento_id}/hoy")
@@ -100,3 +112,15 @@ def estadisticas_operadores(establecimiento_id: int, db: Session = Depends(get_d
             "fila_abierta": op.fila_abierta
         })
     return resultado
+@router.get("/operador/{operador_id}/hoy")
+def estadisticas_individual_hoy(operador_id: int, db: Session = Depends(get_db)):
+    hoy = datetime.utcnow().date()
+    
+    # Filtramos turnos SOLO de este operador
+    turnos = db.query(Turno).filter(
+        Turno.operador_id == operador_id,
+        func.date(Turno.hora_entrada) == hoy
+    ).all()
+    
+    # Reutilizamos tu función calcular_metricas
+    return calcular_metricas(turnos)

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>TurnoYa | Estadísticas Admin</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "primary":"#2B74B9","surface":"#f7f9fc","secondary":"#4a607c",
+            "on-surface":"#191c1e","on-surface-variant":"#414750",
+            "surface-container-lowest":"#ffffff",
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family:'Inter', sans-serif; background-color:#f7f9fc; }
+    h1,h2,h3,.font-headline { font-family:'Manrope', sans-serif; }
+    .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+      /* Nav item activo */
+  .nav-link.active {
+    background-color: #2B74B9;
+    color: white !important;
+  }
+  .nav-link.active .material-symbols-outlined {
+    color: white;
+    
+  }
+  .nav-link.active {
+  background-color: #2B74B9 !important;
+  color: white !important;
+}
+.nav-link.active .material-symbols-outlined {
+  color: white !important;
+}
+.nav-link.active:hover {
+  background-color: #2B74B9 !important;
+}
+  </style>
+</head>
+
+<body class="text-slate-900">
+
+  <aside class="fixed left-0 top-0 h-screen w-72 bg-[#f2f4f7] flex flex-col py-8 border-r border-slate-200 z-50">
+    <div class="px-8 mb-12 flex items-center gap-3">
+      <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+        <span class="material-symbols-outlined text-white">confirmation_number</span>
+      </div>
+      <h1 class="text-2xl font-black text-primary font-headline">TurnoYa</h1>
+    </div>
+<nav class="h-full w-72 fixed left-0 top-0 flex flex-col py-8 bg-[#f2f4f7] z-50 border-r border-slate-200">
+
+  <!-- Logo (ícono ahora en azul bg-[#2B74B9]) -->
+  <div class="px-8 mb-12 flex items-center gap-3">
+    <div class="w-10 h-10 bg-[#2B74B9] rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+      <span class="material-symbols-outlined text-white">confirmation_number</span>
+    </div>
+    <span class="text-2xl font-black text-[#2B74B9]">TurnoYa</span>
+  </div>
+
+  <!-- Links de navegación -->
+  <div class="flex-1 flex flex-col gap-2">
+    <a href="AdminOperaciones.html" id="nav-operaciones"
+       class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span>Operaciones</span>
+    </a>
+    <a href="estadisticasAdmin.html" id="nav-estadisticas"
+       class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
+      <span class="material-symbols-outlined">monitoring</span>
+      <span>Estadísticas</span>
+    </a>
+    <a href="AdminGestionUser.html" id="nav-usuarios"
+       class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
+      <span class="material-symbols-outlined">group</span>
+      <span>Gestión de Usuarios</span>
+    </a>
+    <a href="admin_configuracion.html" id="nav-config"
+       class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
+      <span class="material-symbols-outlined">settings</span>
+      <span>Configuración</span>
+    </a>
+  </div>
+
+  <!-- Usuario + logout -->
+  <div class="px-4 mt-auto space-y-3">
+    <div class="p-4 bg-white rounded-2xl flex items-center gap-3 shadow-sm border border-slate-100">
+      <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#2B74B9] font-bold" id="admin-initials">AD</div>
+      <div class="overflow-hidden">
+        <p class="text-sm font-black truncate" id="admin-nombre">Admin</p>
+        <p class="text-[10px] text-slate-400 font-bold uppercase">Administrador</p>
+      </div>
+    </div>
+    <button onclick="cerrarSesion()" class="w-full flex items-center gap-3 text-red-400 hover:text-red-600 px-4 py-3 hover:bg-red-50 rounded-full transition-all">
+      <span class="material-symbols-outlined">logout</span>
+      <span class="font-bold text-sm">Cerrar sesión</span>
+    </button>
+  </div>
+</nav>
+    <div class="px-6 mt-auto space-y-3">
+      <div class="p-4 bg-white rounded-2xl flex items-center gap-3 shadow-sm border border-slate-100">
+        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary font-bold" id="admin-initials">AD</div>
+        <div class="overflow-hidden">
+          <p class="text-sm font-black truncate" id="admin-nombre">Admin</p>
+          <p class="text-[10px] text-slate-400 font-bold uppercase">Administrador</p>
+        </div>
+      </div>
+      <button onclick="cerrarSesion()" class="w-full flex items-center gap-3 text-red-400 hover:text-red-600 px-4 py-3 hover:bg-red-50 rounded-full transition-all">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="font-bold text-sm">Cerrar sesión</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="ml-72 min-h-screen p-10">
+
+    <header class="mb-10 flex flex-col gap-6">
+      <div>
+        <h2 class="text-4xl font-extrabold font-headline tracking-tight">Estadísticas</h2>
+        <p class="text-slate-500 mt-2 text-lg">Resumen de actividad y rendimiento del local</p>
+      </div>
+      <div class="flex gap-2 p-1.5 bg-slate-200/50 rounded-full w-fit">
+        <button id="btn-hoy"    class="px-6 py-2 rounded-full text-sm font-bold transition-all bg-primary text-white shadow-md">Hoy</button>
+        <button id="btn-semana" class="px-6 py-2 rounded-full text-sm font-medium text-slate-600 hover:bg-white transition-all">Semana</button>
+        <button id="btn-mes"    class="px-6 py-2 rounded-full text-sm font-medium text-slate-600 hover:bg-white transition-all">Mes</button>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-12 gap-6">
+
+      <!-- KPIs principales -->
+      <div class="col-span-12 lg:col-span-8 grid grid-cols-2 gap-6">
+
+        <div class="aspect-square flex flex-col items-center justify-center bg-white rounded-3xl shadow-sm border border-slate-100">
+          <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-4 text-primary">
+            <span class="material-symbols-outlined text-3xl">check_circle</span>
+          </div>
+          <span id="stat-total-atendidos" class="text-6xl font-black font-headline">--</span>
+          <span class="text-xs font-bold uppercase tracking-widest text-slate-400 mt-2">Atendidos</span>
+        </div>
+
+        <div class="aspect-square flex flex-col items-center justify-center bg-white rounded-3xl shadow-sm border border-slate-100">
+          <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4 text-red-500">
+            <span class="material-symbols-outlined text-3xl">cancel</span>
+          </div>
+          <span id="stat-total-cancelados" class="text-6xl font-black font-headline">--</span>
+          <span class="text-xs font-bold uppercase tracking-widest text-slate-400 mt-2">Cancelados</span>
+        </div>
+
+        <div class="aspect-square flex flex-col items-center justify-center bg-white rounded-3xl shadow-sm border border-slate-100">
+          <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-4 text-slate-600">
+            <span class="material-symbols-outlined text-3xl">schedule</span>
+          </div>
+          <div class="flex items-baseline gap-1">
+            <span id="stat-tiempo-medio" class="text-6xl font-black font-headline">--</span>
+            <span class="text-2xl font-bold text-slate-400 italic">min</span>
+          </div>
+          <span class="text-xs font-bold uppercase tracking-widest text-slate-400 mt-2">Promedio Atención</span>
+        </div>
+
+        <div class="aspect-square flex flex-col items-center justify-center bg-white rounded-3xl shadow-sm border border-slate-100">
+          <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mb-4 text-amber-500">
+            <span class="material-symbols-outlined text-3xl">hourglass_empty</span>
+          </div>
+          <span id="stat-en-espera" class="text-6xl font-black font-headline">--</span>
+          <span class="text-xs font-bold uppercase tracking-widest text-slate-400 mt-2">En Espera Ahora</span>
+        </div>
+      </div>
+
+      <!-- Panel lateral -->
+      <div class="col-span-12 lg:col-span-4 space-y-6">
+
+        <div class="bg-gradient-to-br from-primary to-blue-700 p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
+          <div class="relative z-10">
+            <div class="flex items-center gap-2 mb-6">
+              <span class="material-symbols-outlined text-2xl">bolt</span>
+              <h3 class="text-lg font-bold font-headline">Pico de concurrencia</h3>
+            </div>
+            <p id="stat-hora-pico" class="text-4xl font-black font-headline mb-4">--:-- hs</p>
+            <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-white/20 text-[10px] font-black uppercase tracking-wider">
+              Dato en tiempo real
+            </span>
+          </div>
+        </div>
+
+        <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+          <h3 class="text-lg font-extrabold font-headline mb-8">Motivos Frecuentes</h3>
+          <div id="motivos-container" class="space-y-6">
+            <p class="text-slate-400 text-sm italic text-center py-10">Cargando...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-12 flex flex-col items-center gap-4">
+      <button onclick="window.print()" class="flex items-center gap-2 px-8 py-3.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-full shadow-sm hover:bg-slate-50 transition-all active:scale-95">
+        <span class="material-symbols-outlined text-primary">print</span>
+        Imprimir Reporte
+      </button>
+    </div>
+  </main>
+
+<script type="module">
+    import api from './js/api.js';
+    const user = api.getUser(); // Esto ahora lee correctamente de sessionStorage
+    
+    if (user.nombre) {
+        document.getElementById('admin-nombre').innerText = user.nombre;
+        document.getElementById('admin-initials').innerText = user.nombre.charAt(0).toUpperCase();
+    }
+  // Marca el link activo según el archivo HTML actual
+  const page = window.location.pathname.split('/').pop() || 'index.html';
+  const map = {
+    'AdminOperaciones.html':   'nav-operaciones',
+    'estadisticasAdmin.html':  'nav-estadisticas',
+    'AdminGestionUser.html':   'nav-usuarios',
+    'admin_configuracion.html':'nav-config',
+  };
+  const activeId = map[page];
+  if (activeId) {
+    document.getElementById(activeId)?.classList.add('active');
+  }
+    window.cerrarSesion = () => {
+        api.clearSession();
+        window.location.href = 'loginStaff.html';
+    };
+</script>
+  <script type="module" src="js/estadisticas.admin.js"></script>
+</body>
+</html>

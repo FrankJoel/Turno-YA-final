@@ -1,158 +1,192 @@
 <!DOCTYPE html>
-<html lang="es">
+<html class="light" lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TurnoYa — Panel Operador</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
-
-  <div class="topbar">
-    <button onclick="abrirMenu()" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer;">☰</button>
-    <div class="logo-text">Turno<span>YA</span></div>
-    <div style="width:32px;"></div>
-  </div>
-
-  <div class="container" style="padding-top:20px;">
-    <div id="alert-container"></div>
-
-    <div class="card">
-      <p id="bienvenida" style="font-size:15px; font-weight:600; color:var(--primary); margin-bottom:16px;"></p>
-
-      <div class="stat-grid" style="margin-bottom:16px;">
-        <div class="stat-card">
-          <div class="stat-val" id="count-atendidos">0</div>
-          <div class="stat-label">Atendidos hoy</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-val" id="count-espera">0</div>
-          <div class="stat-label">En espera</div>
-        </div>
-      </div>
-
-      <table id="tabla-cola">
-        <thead>
-          <tr>
-            <th>Turno</th>
-            <th>Cliente</th>
-            <th>Motivo</th>
-          </tr>
-        </thead>
-        <tbody id="cola-body">
-          <tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Sin turnos en espera</td></tr>
-        </tbody>
-      </table>
-
-      <div style="margin-top:16px; display:flex; flex-direction:column; gap:10px;">
-        <button class="btn btn-success" id="btn-siguiente" onclick="siguienteTurno()">
-          Siguiente turno
-        </button>
-        <button class="btn btn-outline" id="btn-fila" onclick="toggleFila()">
-          Cerrar fila
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div class="menu-overlay" id="menu-overlay" onclick="cerrarMenu()">
-    <div class="menu-panel" onclick="event.stopPropagation()">
-      <div class="menu-header">
-        <div class="user-name" id="menu-nombre"></div>
-        <div class="user-role">Operador</div>
-      </div>
-      <div class="menu-items">
-        <a class="menu-item" href="operador.html">Panel principal →</a>
-        <a class="menu-item" href="estadisticas.html">Estadísticas →</a>
-      </div>
-      <div class="menu-footer">
-        <button class="btn btn-outline danger" onclick="cerrarSesion()" style="color:var(--danger); border-color:var(--danger);">
-          Cerrar sesión
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <script src="js/api.js"></script>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>TurnoYa - Panel del Operador</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script>
-    const user = api.getUser()
-    if (!user.operador_id) window.location.href = 'login.html'
-
-    document.getElementById('bienvenida').textContent = `¡Bienvenido, ${user.nombre}!`
-    document.getElementById('menu-nombre').textContent = user.nombre
-
-    let filaAbierta = true
-
-    async function cargarCola() {
-      try {
-        const cola = await api.getCola(user.operador_id)
-        const esperando = cola.filter(t => t.estado === 'esperando')
-        const atendiendo = cola.filter(t => t.estado === 'atendiendo')
-
-        document.getElementById('count-espera').textContent = esperando.length
-
-        const tbody = document.getElementById('cola-body')
-        if (cola.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Sin turnos en espera</td></tr>`
-          return
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "primary":"#005b9c","primary-container":"#2b74b9",
+            "surface":"#f7f9fc","on-surface":"#191c1e",
+            "surface-container-lowest":"#ffffff",
+          }
         }
-
-        tbody.innerHTML = cola.map((t, i) => `
-          <tr style="${t.estado === 'atendiendo' ? 'background:#EAF3DE;font-weight:600;' : ''}">
-            <td>${t.codigo}</td>
-            <td>${t.nombre_cliente}</td>
-            <td>${t.motivo}</td>
-          </tr>
-        `).join('')
-      } catch (e) { console.error(e) }
-    }
-
-    async function siguienteTurno() {
-      const btn = document.getElementById('btn-siguiente')
-      btn.disabled = true
-      try {
-        await api.siguienteTurno(user.operador_id)
-        await cargarCola()
-        document.getElementById('count-atendidos').textContent =
-          parseInt(document.getElementById('count-atendidos').textContent) + 1
-      } catch (e) {
-        document.getElementById('alert-container').innerHTML =
-          `<div class="alert alert-error">${e.message}</div>`
       }
-      btn.disabled = false
     }
-
-    async function toggleFila() {
-      try {
-        const res = await api.toggleFila(user.operador_id)
-        filaAbierta = res.fila_abierta
-        document.getElementById('btn-fila').textContent =
-          filaAbierta ? 'Cerrar fila' : 'Abrir fila'
-        document.getElementById('btn-fila').className =
-          filaAbierta ? 'btn btn-outline' : 'btn btn-danger'
-      } catch (e) { console.error(e) }
-    }
-
-    function abrirMenu() {
-      document.getElementById('menu-overlay').style.display = 'block'
-    }
-    function cerrarMenu() {
-      document.getElementById('menu-overlay').style.display = 'none'
-    }
-    function cerrarSesion() {
-      api.clearSession()
-      window.location.href = 'login.html'
-    }
-
-    api.conectarWS(user.operador_id, (msg) => {
-      if (['nuevo_turno', 'siguiente_turno', 'turno_cancelado'].includes(msg.evento)) {
-        cargarCola()
-      }
-    })
-
-    cargarCola()
-    setInterval(cargarCola, 30000)
   </script>
+  <style>
+    body { font-family:'Inter', sans-serif; }
+    h1,h2,h3,.font-headline { font-family:'Manrope', sans-serif; }
+    .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+    /* Animación para cuando el cliente está siendo llamado */
+    .pulse-call {
+      animation: pulse-red 2s infinite;
+    }
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex">
+
+  <aside class="h-screen w-64 fixed left-0 top-0 bg-[#f2f4f7] flex flex-col py-8 z-50 shadow-lg">
+    <div class="px-8">
+      <h1 class="font-headline font-black text-primary mb-6 text-2xl tracking-tighter">TurnoYa</h1>
+    </div>
+
+    <div class="px-6 mb-6">
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-black text-lg">
+            <span id="operador-inicial">?</span>
+          </div>
+          <div>
+            <p id="saludo-operador" class="font-bold text-slate-800 text-sm">Cargando...</p>
+            <p id="username-operador" class="text-[10px] text-slate-400 font-mono">@--</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="flex-1 space-y-2 px-2">
+      <a class="flex items-center gap-3 bg-white text-primary font-bold rounded-full shadow-sm mx-2 px-4 py-3" href="#">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">dashboard</span>
+        <span class="text-sm font-medium">Panel Principal</span>
+      </a>
+      <a id="link-stats" class="flex items-center gap-3 text-slate-600 hover:text-primary px-4 py-3 hover:bg-white/50 rounded-full transition-all" href="estadisticaoperador.html">
+        <span class="material-symbols-outlined">analytics</span>
+        <span class="text-sm font-medium">Estadísticas</span>
+      </a>
+      <a onclick="cerrarSesion()" class="flex items-center gap-3 text-red-400 hover:text-red-600 px-4 py-3 hover:bg-red-50 rounded-full transition-all cursor-pointer">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="text-sm font-medium">Cerrar sesión</span>
+      </a>
+    </nav>
+
+    <div class="px-8 mt-auto">
+      <div class="bg-primary/10 p-4 rounded-2xl">
+        <p class="text-[10px] font-black text-primary uppercase">Puesto Actual</p>
+        <h4 id="display-puesto" class="text-xl font-bold text-primary">--</h4>
+      </div>
+    </div>
+  </aside>
+
+  <main class="flex-1 ml-64 p-8">
+    <header class="flex justify-between items-center mb-10">
+      <div>
+        <h2 class="text-3xl font-bold font-headline tracking-tight">Panel de Control</h2>
+        <p class="text-slate-500 text-sm">Gestioná los turnos de tu puesto en tiempo real.</p>
+      </div>
+      <div class="flex gap-4">
+        <button onclick="pausarFila()" id="btn-pausa"
+                class="bg-amber-100 text-amber-700 px-6 py-2 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-amber-200 transition-all">
+          <span class="material-symbols-outlined text-lg">pause_circle</span> 
+          <span id="txt-pausa">Pausar Fila</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2 space-y-8">
+        <div id="card-atencion" class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100 text-center transition-all">
+          <span id="label-estado" class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Esperando acción</span>
+          <div id="turno-actual" class="text-8xl font-black font-headline text-slate-300 my-6">---</div>
+          
+          <div id="container-botones" class="space-y-4">
+            <button id="btn-siguiente" onclick="llamarSiguiente()"
+                    class="w-full bg-primary text-white py-6 rounded-3xl font-bold text-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-4">
+              <span class="material-symbols-outlined text-3xl">campaign</span>
+              LLAMAR SIGUIENTE
+            </button>
+
+            <button id="btn-atender" onclick="iniciarAtencion()"
+                    class="hidden w-full bg-green-600 text-white py-6 rounded-3xl font-bold text-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg flex items-center justify-center gap-4 pulse-call">
+              <span class="material-symbols-outlined text-3xl">person_check</span>
+              CLIENTE EN PUESTO (INICIAR)
+            </button>
+
+            <button id="btn-finalizar" onclick="finalizarAtencion()"
+                    class="hidden w-full bg-red-500 text-white py-6 rounded-3xl font-bold text-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg flex items-center justify-center gap-4">
+              <span class="material-symbols-outlined text-3xl">task_alt</span>
+              FINALIZAR ATENCIÓN
+            </button>
+          </div>
+          
+          <p id="info-cliente" class="mt-6 text-slate-500 font-medium italic hidden">--</p>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100">
+        <h3 class="font-bold text-lg mb-6 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">format_list_numbered</span>
+          Próximos en Fila
+        </h3>
+        <div id="lista-espera" class="space-y-4">
+          <p class="text-center text-slate-400 text-sm py-10">No hay turnos en espera</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<script type="module">
+    import api from './js/api.js';
+    const user = api.getUser();
+    const inicial = document.getElementById('operador-inicial');
+    
+    if (user.nombre) {
+        if (inicial) inicial.innerText = user.nombre.charAt(0).toUpperCase();
+        document.getElementById('saludo-operador').innerText = `Hola, ${user.nombre}`;
+        document.getElementById('username-operador').innerText = `@op_${user.operador_id || '0'}`;
+        document.getElementById('display-puesto').innerText = `Puesto ${user.operador_id || '--'}`;
+    }
+
+    // --- MANEJO DE FILA ABIERTA/CERRADA ---
+    window.manejarToggleFila = async function() {
+        const opId = user.operador_id;
+        if (!opId) return;
+
+        try {
+            // Llamamos al backend (PATCH /operadores/{id}/fila)
+            const nuevoEstado = await api.toggleFila(opId);
+            
+            // Cambia el estilo del botón según el nuevo estado
+            actualizarInterfazFila(nuevoEstado.fila_abierta);
+            
+            alert(nuevoEstado.fila_abierta 
+                ? "Fila abierta: Los clientes ya pueden sacar turnos." 
+                : "Fila cerrada: Se bloqueó el ingreso de nuevos clientes.");
+        } catch (error) {
+            console.error("Error al cambiar estado de fila:", error);
+        }
+    };
+
+    function actualizarInterfazFila(estaAbierta) {
+        const btn = document.getElementById('btn-toggle-fila');
+        if (!btn) return;
+
+        if (estaAbierta) {
+            btn.innerHTML = '<span class="material-symbols-outlined">lock_open</span> Cerrar Fila';
+            btn.classList.replace('bg-red-500', 'bg-primary-container'); // Ejemplo de cambio de color
+        } else {
+            btn.innerHTML = '<span class="material-symbols-outlined">lock</span> Abrir Fila';
+            btn.classList.replace('bg-primary-container', 'bg-red-500'); 
+        }
+    }
+
+    // --- CERRAR SESIÓN ---
+    window.cerrarSesion = () => {
+        api.clearSession();
+        window.location.href = 'loginStaff.html';
+    };
+</script>
+  <script type="module" src="js/operador.js"></script>
 </body>
 </html>

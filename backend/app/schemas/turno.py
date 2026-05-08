@@ -1,13 +1,14 @@
+# app/schemas/turno.py
 from pydantic import BaseModel
-from typing import Optional
 from datetime import datetime
+from typing import Optional
 
 class TurnoCreate(BaseModel):
     dni_cliente: str
     nombre_cliente: str
     motivo: str
     operador_id: int
-    push_token: Optional[str] = None
+    establecimiento_id: int = 1
 
 class TurnoOut(BaseModel):
     id: int
@@ -16,8 +17,9 @@ class TurnoOut(BaseModel):
     nombre_cliente: str
     motivo: str
     estado: str
-    hora_entrada: datetime
     operador_id: int
+    hora_entrada: datetime
+    hora_finalizacion_estimada: Optional[datetime] = None
 
     class Config:
         from_attributes = True
