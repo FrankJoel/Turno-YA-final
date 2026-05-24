@@ -46,21 +46,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Capturamos servicios de la tabla
     const servicios = [];
+    // Seleccionamos las filas de la tabla
     const filas = document.querySelectorAll('#lista-motivos tr');
+    
     filas.forEach(fila => {
       const isChecked = fila.querySelector('input[type="checkbox"]')?.checked;
-      const motivo = fila.querySelector('input[type="text"]:first-of-type')?.value;
-      const tiempo = fila.querySelector('input[type="text"]:last-of-type')?.value;
+      
+      // Accedemos a las celdas (td) para separar los inputs por posición
+      const celdas = fila.querySelectorAll('td');
+      
+      if (isChecked && celdas.length >= 3) {
+        // La celda 1 tiene el motivo, la celda 2 tiene el tiempo
+        const motivoInput = celdas[1].querySelector('input[type="text"]');
+        const tiempoInput = celdas[2].querySelector('input[type="text"]');
 
-      if (isChecked && motivo) {
-        servicios.push({
-          motivo: motivo,
-          tiempo_estimado: tiempo || "00:20" // Tiempo por defecto si está vacío
-        });
+        if (motivoInput && motivoInput.value.trim()) {
+          servicios.push({
+            motivo: motivoInput.value.trim(),
+            // Ahora capturamos específicamente el valor del segundo input
+            tiempo_estimado: tiempoInput?.value || "00:20"
+          });
+        }
       }
     });
+
+    // ...  payload y enviar a la API
 
     const payload = {
       nombre: form.nombre.value.trim(),
@@ -97,10 +108,10 @@ function agregarFilaConDatos(motivo, tiempo) {
       <input type="checkbox" checked class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20">
     </td>
     <td class="px-4 py-4">
-      <input type="text" value="${motivo}" class="w-full bg-transparent border-none p-0 font-bold text-sm text-on-surface focus:ring-0">
+      <input type="text" value="${motivo}" class="js-motivo w-full bg-transparent border-none p-0 font-bold text-sm text-on-surface focus:ring-0">
     </td>
     <td class="px-6 py-4 text-right font-black text-lg text-primary">
-      <input type="text" value="${tiempo}" class="bg-surface-container-high rounded-lg border-none px-3 py-1 w-20 text-right focus:ring-2 focus:ring-primary/20">
+      <input type="text" placeholder="00:20" value="${tiempo}" class="js-tiempo bg-surface-container-high rounded-lg border-none px-3 py-1 w-20 text-right focus:ring-2 focus:ring-primary/20">
     </td>
     <td class="px-6 py-4">
       <button type="button" onclick="this.closest('tr').remove()" class="text-outline-variant hover:text-red-500 transition-colors">
@@ -110,3 +121,16 @@ function agregarFilaConDatos(motivo, tiempo) {
   `;
   tbody.appendChild(tr);
 }
+window.generarQR = async function() {
+  if (!editId) {
+    alert('Primero guardá el operador para poder generar el QR.');
+    return;
+  }
+  try {
+    const baseUrl = `${window.location.origin}/frontend/frontend`;
+    const url = await api.getQR(editId, baseUrl);
+    window.open(url, '_blank');
+  } catch (err) {
+    alert('Error al generar QR: ' + err.message);
+  }
+};

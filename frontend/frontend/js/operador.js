@@ -31,11 +31,13 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 async function cargarInfoOperador() {
     try {
-        const estId = user.establecimiento_id || 1;
+        const estId = parseInt(user.establecimiento_id) || 1;
         const lista = await api.getOperadores(estId);
         const op = lista.find(o => o.id === operadorId);
+        
         if (op) {
-            setText('display-puesto', `P${op.id}`);
+            const nombrePuesto = op.puesto || `Puesto ${op.id}`;
+            setText('display-puesto',nombrePuesto);
             setText('saludo-operador', `¡Hola, ${op.nombre}!`);
             setText('username-operador', `@${op.username}`);
             

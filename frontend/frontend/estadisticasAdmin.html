@@ -5,6 +5,7 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>TurnoYa | Estadísticas Admin</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script>
@@ -200,9 +201,9 @@
     </div>
 
     <div class="mt-12 flex flex-col items-center gap-4">
-      <button onclick="window.print()" class="flex items-center gap-2 px-8 py-3.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-full shadow-sm hover:bg-slate-50 transition-all active:scale-95">
-        <span class="material-symbols-outlined text-primary">print</span>
-        Imprimir Reporte
+      <button id="btn-exportar-pdf" class="flex items-center gap-2 px-8 py-3.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-full shadow-sm hover:bg-slate-50 transition-all active:scale-95">
+      <span class="material-symbols-outlined text-primary">picture_as_pdf</span>
+         Exportar PDF
       </button>
     </div>
   </main>

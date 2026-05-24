@@ -17,8 +17,9 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     token = auth_service.create_token({
         "sub":                str(operador.id),
         "rol":                operador.rol,
-        "operador_id":        operador.id,        # ← agregado
-        "establecimiento_id": operador.establecimiento_id,  # ← agregado
+        "operador_id":        operador.id,        
+        "establecimiento_id": operador.establecimiento_id,  
+        "puesto":             operador.puesto,
     })
 
     return {
@@ -26,6 +27,8 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         "token_type":         "bearer",
         "rol":                operador.rol,
         "nombre":             operador.nombre,
+        "username":           operador.username,
         "operador_id":        operador.id,
         "establecimiento_id": operador.establecimiento_id,
+        "puesto":             operador.puesto,
     }

@@ -140,14 +140,23 @@
     import api from './js/api.js';
     const user = api.getUser();
     const inicial = document.getElementById('operador-inicial');
+    // --- INICIALIZACIÓN DE INTERFAZ ---
+  if (user.nombre) {
+    // 1. Identidad Visual (Lo que ve el ojo humano)
+    document.getElementById('saludo-operador').innerText = `Hola, ${user.nombre}`;
+    document.getElementById('username-operador').innerText = `@${user.username || 'user'}`;
     
-    if (user.nombre) {
-        if (inicial) inicial.innerText = user.nombre.charAt(0).toUpperCase();
-        document.getElementById('saludo-operador').innerText = `Hola, ${user.nombre}`;
-        document.getElementById('username-operador').innerText = `@op_${user.operador_id || '0'}`;
-        document.getElementById('display-puesto').innerText = `Puesto ${user.operador_id || '--'}`;
-    }
+    // Aquí usamos PUESTO para el texto (P1)
+    document.getElementById('display-puesto').innerText = user.puesto || `ID: ${user.operador_id}`;
 
+    // 2. Lógica de Red (Lo que ve la base de datos)
+    // Cuando llames a otras funciones, usá el ID, NO el puesto.
+    const estId = user.establecimiento_id; 
+    if (estId) {
+        // Ejemplo: Cargar la lista de compañeros usando el ID numérico
+        cargarCompañeros(estId); 
+    }
+  }
     // --- MANEJO DE FILA ABIERTA/CERRADA ---
     window.manejarToggleFila = async function() {
         const opId = user.operador_id;

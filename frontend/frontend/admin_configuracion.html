@@ -30,34 +30,22 @@
     body { font-family:'Inter', sans-serif; background-color:#f7f9fc; }
     h1, h2, h3 { font-family:'Manrope', sans-serif; }
     .material-symbols-outlined { vertical-align:middle; }
-      /* Nav item activo */
-      /* Nav item activo */
-  .nav-link.active {
-    background-color: #2B74B9;
-    color: white !important;
-  }
-  .nav-link.active .material-symbols-outlined {
-    color: white;
-    
-  }
-  .nav-link.active {
-  background-color: #2B74B9 !important;
-  color: white !important;
-}
-.nav-link.active .material-symbols-outlined {
-  color: white !important;
-}
-.nav-link.active:hover {
-  background-color: #2B74B9 !important;
-}
+    .nav-link.active { background-color: #2B74B9 !important; color: white !important; }
+    .nav-link.active .material-symbols-outlined { color: white !important; }
+    .nav-link.active:hover { background-color: #2B74B9 !important; }
+
+    /* Toast */
+    #toast {
+      transition: opacity 0.3s ease;
+    }
+    #toast.hidden { opacity: 0; pointer-events: none; }
   </style>
 </head>
 
 <body class="text-on-surface overflow-x-hidden">
 
+<!-- ── NAV ───────────────────────────────────────────────────────────────── -->
 <nav class="h-full w-72 fixed left-0 top-0 flex flex-col py-8 bg-[#f2f4f7] z-50 border-r border-slate-200">
-
-  <!-- Logo (ícono ahora en azul bg-[#2B74B9]) -->
   <div class="px-8 mb-12 flex items-center gap-3">
     <div class="w-10 h-10 bg-[#2B74B9] rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
       <span class="material-symbols-outlined text-white">confirmation_number</span>
@@ -65,31 +53,25 @@
     <span class="text-2xl font-black text-[#2B74B9]">TurnoYa</span>
   </div>
 
-  <!-- Links de navegación -->
   <div class="flex-1 flex flex-col gap-2">
     <a href="AdminOperaciones.html" id="nav-operaciones"
        class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
-      <span class="material-symbols-outlined">dashboard</span>
-      <span>Operaciones</span>
+      <span class="material-symbols-outlined">dashboard</span><span>Operaciones</span>
     </a>
     <a href="estadisticasAdmin.html" id="nav-estadisticas"
        class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
-      <span class="material-symbols-outlined">monitoring</span>
-      <span>Estadísticas</span>
+      <span class="material-symbols-outlined">monitoring</span><span>Estadísticas</span>
     </a>
     <a href="AdminGestionUser.html" id="nav-usuarios"
        class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
-      <span class="material-symbols-outlined">group</span>
-      <span>Gestión de Usuarios</span>
+      <span class="material-symbols-outlined">group</span><span>Gestión de Usuarios</span>
     </a>
     <a href="admin_configuracion.html" id="nav-config"
        class="nav-link mx-4 px-6 py-3 rounded-full flex items-center gap-4 font-semibold text-slate-600 hover:bg-white/50 transition-all">
-      <span class="material-symbols-outlined">settings</span>
-      <span>Configuración</span>
+      <span class="material-symbols-outlined">settings</span><span>Configuración</span>
     </a>
   </div>
 
-  <!-- Usuario + logout -->
   <div class="px-4 mt-auto space-y-3">
     <div class="p-4 bg-white rounded-2xl flex items-center gap-3 shadow-sm border border-slate-100">
       <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#2B74B9] font-bold" id="admin-initials">AD</div>
@@ -104,109 +86,246 @@
     </button>
   </div>
 </nav>
-  <main class="ml-72 pt-20 px-10 pb-12 min-h-screen">
-    
-    <header class="mb-10">
-      <h1 class="text-4xl font-extrabold tracking-tight mb-2">Personalización del Molde</h1>
-      <p class="text-on-surface-variant">Adaptá la plataforma a las necesidades de tu negocio.</p>
-    </header>
 
-    <div class="grid grid-cols-12 gap-8">
-      
-      <section class="col-span-12 lg:col-span-5 space-y-6">
-        <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-          <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">store</span> Datos del Local
-          </h3>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Nombre de la Tienda</label>
-              <input type="text" placeholder="Ej: Barbería El Estilo" class="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 focus:ring-2 focus:ring-primary/20">
-            </div>
-            <div>
-              <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Rubro / Categoría</label>
-              <select class="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 focus:ring-2 focus:ring-primary/20">
-                <option>Salud / Farmacia</option>
-                <option>Estética / Peluquería</option>
-                <option>Gastronomía</option>
-                <option>Atención al Cliente General</option>
-              </select>
-            </div>
+<!-- ── MAIN ───────────────────────────────────────────────────────────────── -->
+<main class="ml-72 pt-20 px-10 pb-12 min-h-screen">
+
+  <header class="mb-10">
+    <h1 class="text-4xl font-extrabold tracking-tight mb-2">Configuración del Local</h1>
+    <p class="text-on-surface-variant">Adaptá la plataforma a las necesidades de tu negocio.</p>
+  </header>
+
+  <!-- Skeleton de carga -->
+  <div id="skeleton" class="grid grid-cols-12 gap-8 animate-pulse">
+    <div class="col-span-12 lg:col-span-5 h-64 bg-slate-200 rounded-3xl"></div>
+    <div class="col-span-12 lg:col-span-7 h-64 bg-slate-200 rounded-3xl"></div>
+  </div>
+
+  <!-- Contenido real (oculto hasta que cargue) -->
+  <div id="contenido" class="hidden grid grid-cols-12 gap-8">
+
+    <!-- Columna izquierda: Datos del Local -->
+    <section class="col-span-12 lg:col-span-5 space-y-6">
+      <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+        <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">store</span> Datos del Local
+        </h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Nombre del Local</label>
+            <input id="input-nombre" type="text" placeholder="Ej: Barbería El Estilo"
+                   class="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 focus:ring-2 focus:ring-primary/20">
+          </div>
+          <div>
+            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Rubro / Categoría</label>
+            <select id="input-rubro" class="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 focus:ring-2 focus:ring-primary/20">
+              <option value="Salud / Farmacia">Salud / Farmacia</option>
+              <option value="Estética / Peluquería">Estética / Peluquería</option>
+              <option value="Gastronomía">Gastronomía</option>
+              <option value="Atención al Cliente General">Atención al Cliente General</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Tolerancia de espera (minutos)</label>
+            <input id="input-tolerancia" type="number" min="1" max="120" placeholder="20"
+                   class="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 focus:ring-2 focus:ring-primary/20">
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-primary/5 p-8 rounded-3xl border border-primary/10">
+        <h3 class="font-bold text-primary mb-2">Tip</h3>
+        <p class="text-sm text-primary-container leading-relaxed">
+          La tolerancia de espera define cuántos minutos puede pasar un cliente sin presentarse antes de que su turno sea cancelado automáticamente.
+        </p>
+      </div>
+    </section>
+
+    <!-- Columna derecha: Guardar -->
+    <section class="col-span-12 lg:col-span-7">
+      <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 h-full flex flex-col">
+        <h3 class="text-lg font-bold flex items-center gap-2 mb-6">
+          <span class="material-symbols-outlined text-primary">info</span> Resumen
+        </h3>
+
+        <div class="flex-1 space-y-4">
+          <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+            <span class="text-sm font-semibold text-slate-500">Nombre actual</span>
+            <span class="font-bold text-sm" id="resumen-nombre">—</span>
+          </div>
+          <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+            <span class="text-sm font-semibold text-slate-500">Rubro</span>
+            <span class="font-bold text-sm" id="resumen-rubro">—</span>
+          </div>
+          <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+            <span class="text-sm font-semibold text-slate-500">Tolerancia de espera</span>
+            <span class="font-bold text-sm" id="resumen-tolerancia">—</span>
+          </div>
+          <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+            <span class="text-sm font-semibold text-slate-500">Estado</span>
+            <span id="resumen-activo" class="font-bold text-sm text-green-600">Activo</span>
           </div>
         </div>
 
-        <div class="bg-primary/5 p-8 rounded-3xl border border-primary/10">
-          <h3 class="font-bold text-primary mb-2">Tip de Molde</h3>
-          <p class="text-sm text-primary-container leading-relaxed">Configurar el rubro ajustará automáticamente los términos del sistema (ej: "Paciente" en Salud, "Cliente" en Comercio).</p>
+        <div class="mt-10 pt-6 border-t border-slate-100 flex justify-end">
+          <button id="btn-guardar"
+                  onclick="guardarConfiguracion()"
+                  class="bg-primary text-white px-10 py-4 rounded-full font-bold shadow-lg shadow-blue-500/20 hover:scale-[1.02] transition-transform flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">save</span>
+            Guardar Configuración
+          </button>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section class="col-span-12 lg:col-span-7">
-        <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-          <div class="flex justify-between items-center mb-8">
-            <h3 class="text-lg font-bold flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary">category</span> Servicios Disponibles
-            </h3>
-            <button class="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
-              <span class="material-symbols-outlined text-sm">add</span> Añadir nuevo
-            </button>
-          </div>
+  </div><!-- /contenido -->
 
-          <div class="space-y-3" id="lista-servicios">
-            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-              <div class="flex items-center gap-4">
-                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-primary shadow-sm">
-                  <span class="material-symbols-outlined">content_cut</span>
-                </div>
-                <div>
-                  <p class="font-bold text-sm text-on-surface">Corte de Cabello</p>
-                  <p class="text-[10px] text-slate-400 font-bold uppercase">Asignado a: Todos los puestos</p>
-                </div>
-              </div>
-              <button class="text-slate-400 hover:text-red-500 transition-colors">
-                <span class="material-symbols-outlined">delete</span>
-              </button>
-            </div>
+  <!-- Error de carga -->
+  <div id="error-carga" class="hidden text-center py-20">
+    <span class="material-symbols-outlined text-5xl text-red-400">error</span>
+    <p class="mt-4 text-red-500 font-bold">No se pudo cargar la configuración.</p>
+    <button onclick="cargarConfiguracion()" class="mt-4 text-primary font-bold underline">Reintentar</button>
+  </div>
 
-            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-              <div class="flex items-center gap-4">
-                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-primary shadow-sm">
-                  <span class="material-symbols-outlined">clean_hands</span>
-                </div>
-                <div>
-                  <p class="font-bold text-sm text-on-surface">Manicura / Uñas</p>
-                  <p class="text-[10px] text-slate-400 font-bold uppercase">Asignado a: Puesto 4, Puesto 5</p>
-                </div>
-              </div>
-              <button class="text-slate-400 hover:text-red-500 transition-colors">
-                <span class="material-symbols-outlined">delete</span>
-              </button>
-            </div>
-          </div>
+</main>
 
-          <div class="mt-10 pt-6 border-t border-slate-100 flex justify-end">
-            <button class="bg-primary text-white px-10 py-4 rounded-full font-bold shadow-lg shadow-blue-500/20 hover:scale-[1.02] transition-transform">
-              Guardar Configuración
-            </button>
-          </div>
-        </div>
-      </section>
+<!-- ── TOAST ──────────────────────────────────────────────────────────────── -->
+<div id="toast"
+     class="hidden fixed bottom-8 right-8 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl shadow-xl text-white font-bold text-sm">
+  <span class="material-symbols-outlined" id="toast-icon">check_circle</span>
+  <span id="toast-msg">Configuración guardada</span>
+</div>
 
-    </div>
-  </main>
-<script>
-  // Marca el link activo según el archivo HTML actual
-  const page = window.location.pathname.split('/').pop() || 'index.html';
+<!-- ── SCRIPT ─────────────────────────────────────────────────────────────── -->
+<script type="module">
+  import api from './js/api.js';
+
+  // ── Sesión ──────────────────────────────────────────────────────────────
+  const user = api.getUser();
+  if (!user || user.rol !== 'admin') {
+    window.location.href = 'index.html';
+  }
+
+  const ESTABLECIMIENTO_ID = user.establecimiento_id;
+
+  document.getElementById('admin-nombre').textContent = user.nombre || 'Admin';
+  const iniciales = (user.nombre || 'AD').slice(0, 2).toUpperCase();
+  document.getElementById('admin-initials').textContent = iniciales;
+
+  // ── Nav activo ───────────────────────────────────────────────────────────
+  const page = window.location.pathname.split('/').pop();
   const map = {
-    'AdminOperaciones.html':   'nav-operaciones',
-    'estadisticasAdmin.html':  'nav-estadisticas',
-    'AdminGestionUser.html':   'nav-usuarios',
-    'admin_configuracion.html':'nav-config',
+    'AdminOperaciones.html':    'nav-operaciones',
+    'estadisticasAdmin.html':   'nav-estadisticas',
+    'AdminGestionUser.html':    'nav-usuarios',
+    'admin_configuracion.html': 'nav-config',
   };
   const activeId = map[page];
-  if (activeId) {
-    document.getElementById(activeId)?.classList.add('active');
+  if (activeId) document.getElementById(activeId)?.classList.add('active');
+
+  // ── Toast ────────────────────────────────────────────────────────────────
+  function mostrarToast(msg, tipo = 'ok') {
+    const toast = document.getElementById('toast');
+    const icon  = document.getElementById('toast-icon');
+    const text  = document.getElementById('toast-msg');
+
+    text.textContent = msg;
+    icon.textContent = tipo === 'ok' ? 'check_circle' : 'error';
+    toast.className = `fixed bottom-8 right-8 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl shadow-xl text-white font-bold text-sm ${
+      tipo === 'ok' ? 'bg-green-500' : 'bg-red-500'
+    }`;
+
+    setTimeout(() => { toast.classList.add('hidden'); }, 3000);
   }
+
+  // ── Actualizar resumen lateral ───────────────────────────────────────────
+  function actualizarResumen() {
+    document.getElementById('resumen-nombre').textContent =
+      document.getElementById('input-nombre').value || '—';
+    document.getElementById('resumen-rubro').textContent =
+      document.getElementById('input-rubro').value || '—';
+    const tol = document.getElementById('input-tolerancia').value;
+    document.getElementById('resumen-tolerancia').textContent =
+      tol ? `${tol} min` : '—';
+  }
+
+  document.getElementById('input-nombre').addEventListener('input', actualizarResumen);
+  document.getElementById('input-rubro').addEventListener('change', actualizarResumen);
+  document.getElementById('input-tolerancia').addEventListener('input', actualizarResumen);
+
+  // ── Cargar configuración ─────────────────────────────────────────────────
+  async function cargarConfiguracion() {
+    document.getElementById('skeleton').classList.remove('hidden');
+    document.getElementById('contenido').classList.add('hidden');
+    document.getElementById('error-carga').classList.add('hidden');
+
+    try {
+      const est = await api.getEstablecimiento(ESTABLECIMIENTO_ID);
+
+      document.getElementById('input-nombre').value     = est.nombre || '';
+      document.getElementById('input-tolerancia').value = est.tolerancia_minutos ?? 20;
+
+      // Seleccionar rubro en el <select>
+      const select = document.getElementById('input-rubro');
+      for (const opt of select.options) {
+        if (opt.value === est.rubro) { opt.selected = true; break; }
+      }
+
+      document.getElementById('resumen-activo').textContent = est.activo ? 'Activo' : 'Inactivo';
+      document.getElementById('resumen-activo').className =
+        `font-bold text-sm ${est.activo ? 'text-green-600' : 'text-red-500'}`;
+
+      actualizarResumen();
+
+      document.getElementById('skeleton').classList.add('hidden');
+      document.getElementById('contenido').classList.remove('hidden');
+    } catch (e) {
+      document.getElementById('skeleton').classList.add('hidden');
+      document.getElementById('error-carga').classList.remove('hidden');
+      console.error('[Config] Error al cargar:', e);
+    }
+  }
+
+  // ── Guardar configuración ────────────────────────────────────────────────
+  window.guardarConfiguracion = async function () {
+    const btn = document.getElementById('btn-guardar');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">autorenew</span> Guardando…';
+
+    const payload = {
+      nombre:               document.getElementById('input-nombre').value.trim(),
+      rubro:                document.getElementById('input-rubro').value,
+      tolerancia_minutos:   parseInt(document.getElementById('input-tolerancia').value) || 20,
+    };
+
+    if (!payload.nombre) {
+      mostrarToast('El nombre del local es obligatorio.', 'error');
+      btn.disabled = false;
+      btn.innerHTML = '<span class="material-symbols-outlined text-sm">save</span> Guardar Configuración';
+      return;
+    }
+
+    try {
+      await api.updateEstablecimiento(ESTABLECIMIENTO_ID, payload);
+      actualizarResumen();
+      mostrarToast('Configuración guardada correctamente.');
+    } catch (e) {
+      mostrarToast('Error al guardar. Intentá de nuevo.', 'error');
+      console.error('[Config] Error al guardar:', e);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span class="material-symbols-outlined text-sm">save</span> Guardar Configuración';
+    }
+  };
+
+  window.cerrarSesion = function () {
+    api.clearSession();
+    window.location.href = 'index.html';
+  };
+
+  // ── Arrancar ─────────────────────────────────────────────────────────────
+  cargarConfiguracion();
 </script>
+
 </body>
 </html>

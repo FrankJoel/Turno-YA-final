@@ -13,9 +13,9 @@ class ConnectionManager:
         self.connections[operador_id].append(websocket)
 
     def disconnect(self, websocket: WebSocket, operador_id: int):
-    if operador_id in self.connections:
-        if websocket in self.connections[operador_id]:
-            self.connections[operador_id].remove(websocket)
+        if operador_id in self.connections:
+            if websocket in self.connections[operador_id]:
+             self.connections[operador_id].remove(websocket)
         
         #  Limpieza de memoria ---
         if not self.connections[operador_id]:

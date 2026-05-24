@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- jsPDF CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script id="tailwind-config">
         tailwind.config = {
             theme: {
@@ -27,6 +29,15 @@
         body { font-family: 'Inter', sans-serif; }
         h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+        #btn-exportar-pdf.cargando {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        #btn-exportar-pdf.cargando .btn-icon { display: none; }
+        #btn-exportar-pdf.cargando .btn-spinner { display: inline-block !important; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { animation: spin 0.8s linear infinite; display: inline-block; }
     </style>
 </head>
 <body class="bg-surface text-on-surface min-h-screen flex">
@@ -36,19 +47,21 @@
             <h1 class="font-manrope font-black text-[#2B74B9] mb-8 text-2xl tracking-tighter">TurnoYa</h1>
         </div>
         <nav class="flex-1 space-y-2 px-2">
-            <a class="flex items-center gap-3 text-slate-600 hover:text-[#2B74B9] px-4 py-3 hover:bg-white/50 rounded-full transition-all group" href="operador.html">
+            <a class="flex items-center gap-3 text-slate-600 hover:text-[#2B74B9] px-4 py-3 hover:bg-white/50 rounded-full transition-all" href="operador.html">
                 <span class="material-symbols-outlined">dashboard</span>
-                <span class="font-inter text-sm font-medium">Panel Principal</span>
+                <span class="text-sm font-medium">Panel Principal</span>
             </a>
             <a class="flex items-center gap-3 bg-white text-[#2B74B9] font-bold rounded-full shadow-sm mx-2 px-4 py-3" href="#">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
-                <span class="font-inter text-sm font-medium">Estadísticas</span>
+                <span class="text-sm font-medium">Estadísticas</span>
             </a>
         </nav>
         <div class="px-4 mt-auto space-y-2">
-            <button onclick="window.print()" class="w-full bg-primary-container text-white py-3 px-6 rounded-full font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity active:scale-95 mb-6">
-                <span class="material-symbols-outlined text-sm">print</span>
-                Imprimir Reporte
+            <button id="btn-exportar-pdf"
+                    class="w-full bg-primary-container text-white py-3 px-6 rounded-full font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity active:scale-95 mb-6">
+                <span class="material-symbols-outlined text-sm btn-icon">picture_as_pdf</span>
+                <span class="btn-spinner spinner hidden">⟳</span>
+                Exportar PDF
             </button>
         </div>
     </aside>
@@ -64,18 +77,17 @@
         <div class="w-full max-w-6xl px-8 pb-12 space-y-8">
             <div class="flex justify-center">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
-                    <div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm border border-slate-100 relative overflow-hidden group">
+                    <div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm border border-slate-100">
                         <span class="text-[10px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">VOLUMEN TOTAL</span>
                         <div class="flex items-baseline gap-2 mt-2">
                             <span id="stat-total-atendidos" class="text-5xl font-extrabold font-headline text-primary">0</span>
                         </div>
                         <p class="text-sm text-on-surface-variant mt-2">Clientes atendidos hoy</p>
                     </div>
-
-                    <div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm border border-slate-100 relative overflow-hidden group">
+                    <div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm border border-slate-100">
                         <span class="text-[10px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">VELOCIDAD PROMEDIO</span>
                         <div class="flex items-baseline gap-2 mt-2">
-                            <span id="stat-tiempo-medio" class="text-5xl font-extrabold font-headline text-primary">12m</span>
+                            <span id="stat-tiempo-medio" class="text-5xl font-extrabold font-headline text-primary">0m</span>
                         </div>
                         <p class="text-sm text-on-surface-variant mt-2">Minutos por servicio</p>
                     </div>
@@ -85,8 +97,7 @@
             <div class="flex justify-center">
                 <div class="w-full max-w-4xl bg-surface-container-lowest p-8 rounded-lg shadow-sm border border-slate-100">
                     <h3 class="text-xl font-bold font-headline mb-10">Demanda por Servicio</h3>
-                    <div id="contenedor-motivos" class="space-y-8">
-                        </div>
+                    <div id="contenedor-motivos" class="space-y-8"></div>
                 </div>
             </div>
 
@@ -97,12 +108,11 @@
                         <thead>
                             <tr class="bg-slate-50">
                                 <th class="px-8 py-4 text-[10px] font-bold text-on-surface-variant uppercase">TICKET</th>
-                                <th class="px-8 py-4 text-[10px] font-bold text-on-surface-variant uppercase">PUESTO</th>
+                                <th class="px-8 py-4 text-[10px] font-bold text-on-surface-variant uppercase">SERVICIO</th>
                                 <th class="px-8 py-4 text-[10px] font-bold text-on-surface-variant uppercase">HORA</th>
                             </tr>
                         </thead>
-                        <tbody id="tabla-actividad" class="divide-y divide-slate-100">
-                            </tbody>
+                        <tbody id="tabla-actividad" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
             </section>
@@ -112,42 +122,48 @@
 <script type="module">
     import api from './js/api.js';
 
+    // Estado global para que el botón PDF pueda accederlo
+    let datosEstadisticas = null;
+    let nombreOperador    = '';
+
+    // ── CARGAR ESTADÍSTICAS ──────────────────────────────────────────────────
     async function cargarMisEstadisticas() {
         const user = api.getUser();
-        const opId = user.operador_id; 
+        const opId = user.operador_id;
+        nombreOperador = user.nombre || 'Operador';
 
         if (!opId) return;
 
         try {
             const data = await api.request('GET', `/estadisticas/operador/${opId}/hoy`, null, api.getToken());
+            datosEstadisticas = data;
 
-            // 1. Números Principales
+            // Números principales
             document.getElementById('stat-total-atendidos').innerText = data.atendidos ?? 0;
-            document.getElementById('stat-tiempo-medio').innerText = (data.promedio_minutos ?? 0) + 'm';
-            
-            // 2. Tabla de Actividad (Últimos Clientes)
+            document.getElementById('stat-tiempo-medio').innerText    = (data.promedio_minutos ?? 0) + 'm';
+
+            // Tabla de actividad
             const tabla = document.getElementById('tabla-actividad');
-            if (tabla && data.ultimos) {
-                tabla.innerHTML = data.ultimos.map(t => `
-                    <tr class="hover:bg-slate-50 transition-colors border-b border-slate-50">
-                        <td class="px-8 py-4 font-bold text-primary">${t.codigo}</td>
-                        <td class="px-8 py-4 text-sm">${t.motivo}</td>
-                        <td class="px-8 py-4 text-sm text-slate-500">${t.hora} hs</td>
-                    </tr>
-                `).join('') || '<tr><td colspan="3" class="p-4 text-center text-slate-400">Sin actividad hoy</td></tr>';
+            if (tabla) {
+                tabla.innerHTML = (data.ultimos && data.ultimos.length > 0)
+                    ? data.ultimos.map(t => `
+                        <tr class="hover:bg-slate-50 transition-colors border-b border-slate-50">
+                            <td class="px-8 py-4 font-bold text-primary">${t.codigo}</td>
+                            <td class="px-8 py-4 text-sm">${t.motivo}</td>
+                            <td class="px-8 py-4 text-sm text-slate-500">${t.hora} hs</td>
+                        </tr>`).join('')
+                    : '<tr><td colspan="3" class="p-4 text-center text-slate-400">Sin actividad hoy</td></tr>';
             }
 
-            // 3. Barras de Motivos (Demanda por Servicio)
+            // Barras de motivos
             const cont = document.getElementById('contenedor-motivos');
-            if (cont && data.motivos) {
-                const total = Object.values(data.motivos).reduce((a, b) => a + b, 0) || 1;
-                const entries = Object.entries(data.motivos);
-                
-                if (entries.length === 0) {
-                    cont.innerHTML = '<p class="text-slate-400 italic text-sm">No hay datos de servicios hoy.</p>';
-                } else {
-                    cont.innerHTML = entries.map(([nombre, cant]) => {
-                        const porcentaje = Math.round((cant / total) * 100);
+            if (cont) {
+                const entries = Object.entries(data.motivos || {});
+                const total   = entries.reduce((a, [, v]) => a + v, 0) || 1;
+
+                cont.innerHTML = entries.length > 0
+                    ? entries.map(([nombre, cant]) => {
+                        const pct = Math.round((cant / total) * 100);
                         return `
                             <div class="mb-6">
                                 <div class="flex justify-between text-sm mb-2">
@@ -155,17 +171,203 @@
                                     <span class="font-bold text-primary">${cant}</span>
                                 </div>
                                 <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                                    <div class="bg-primary h-full rounded-full transition-all duration-1000" style="width:${porcentaje}%"></div>
+                                    <div class="bg-primary h-full rounded-full transition-all duration-1000" style="width:${pct}%"></div>
                                 </div>
                             </div>`;
-                    }).join('');
-                }
+                    }).join('')
+                    : '<p class="text-slate-400 italic text-sm">No hay datos de servicios hoy.</p>';
             }
+
         } catch (error) {
-            console.error("Error cargando estadísticas completas:", error);
+            console.error('[Estadísticas] Error al cargar:', error);
         }
     }
 
+    // ── EXPORTAR PDF ─────────────────────────────────────────────────────────
+    function exportarPDF() {
+        if (!datosEstadisticas) {
+            alert('Los datos aún no cargaron. Esperá un momento e intentá de nuevo.');
+            return;
+        }
+
+        const btn = document.getElementById('btn-exportar-pdf');
+        btn.classList.add('cargando');
+
+        try {
+            const jsPDF = window.jspdf.jsPDF;
+            const doc        = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+            const AZUL      = [0, 91, 156];
+            const AZUL_CLARO= [43, 116, 185];
+            const GRIS      = [65, 71, 80];
+            const GRIS_CLARO= [241, 245, 249];
+            const BLANCO    = [255, 255, 255];
+            const VERDE     = [22, 163, 74];
+            const W         = 210; // ancho A4
+            const fecha     = new Date().toLocaleDateString('es-AR', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+            const hora      = new Date().toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' });
+
+            // ── HEADER ──────────────────────────────────────────────────────
+            doc.setFillColor(...AZUL);
+            doc.rect(0, 0, W, 32, 'F');
+
+            doc.setTextColor(...BLANCO);
+            doc.setFontSize(22);
+            doc.setFont('helvetica', 'bold');
+            doc.text('TurnoYa', 14, 14);
+
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Sala de Espera Virtual', 14, 21);
+
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.text('REPORTE DE ESTADÍSTICAS DEL DÍA', W - 14, 14, { align: 'right' });
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            doc.text(`Generado: ${fecha} ${hora}`, W - 14, 21, { align: 'right' });
+            doc.text(`Operador: ${nombreOperador}`, W - 14, 27, { align: 'right' });
+
+            let y = 44;
+
+            // ── MÉTRICAS PRINCIPALES ─────────────────────────────────────────
+            doc.setFillColor(...GRIS_CLARO);
+            doc.roundedRect(14, y, 85, 28, 3, 3, 'F');
+            doc.roundedRect(111, y, 85, 28, 3, 3, 'F');
+
+            doc.setTextColor(...GRIS);
+            doc.setFontSize(7);
+            doc.setFont('helvetica', 'bold');
+            doc.text('CLIENTES ATENDIDOS', 56, y + 8, { align: 'center' });
+            doc.text('TIEMPO PROMEDIO', 153, y + 8, { align: 'center' });
+
+            doc.setTextColor(...AZUL);
+            doc.setFontSize(28);
+            doc.setFont('helvetica', 'bold');
+            doc.text(String(datosEstadisticas.atendidos ?? 0), 56, y + 22, { align: 'center' });
+            doc.text(`${datosEstadisticas.promedio_minutos ?? 0} min`, 153, y + 22, { align: 'center' });
+
+            y += 38;
+
+            // ── DEMANDA POR SERVICIO ──────────────────────────────────────────
+            const motivos = Object.entries(datosEstadisticas.motivos || {});
+            if (motivos.length > 0) {
+                doc.setTextColor(...AZUL);
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Demanda por Servicio', 14, y);
+                y += 2;
+
+                // Línea separadora
+                doc.setDrawColor(...AZUL_CLARO);
+                doc.setLineWidth(0.5);
+                doc.line(14, y + 2, W - 14, y + 2);
+                y += 8;
+
+                const totalMotivos = motivos.reduce((a, [, v]) => a + v, 0) || 1;
+
+                motivos.forEach(([nombre, cant]) => {
+                    const pct      = Math.round((cant / totalMotivos) * 100);
+                    const barWidth = ((W - 28 - 30) * pct) / 100; // max ancho barra
+
+                    doc.setTextColor(...GRIS);
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(nombre, 14, y + 4);
+
+                    doc.setTextColor(...AZUL);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`${cant}`, W - 14, y + 4, { align: 'right' });
+
+                    // Fondo barra
+                    doc.setFillColor(226, 232, 240);
+                    doc.roundedRect(14, y + 6, W - 28 - 14, 4, 2, 2, 'F');
+
+                    // Barra rellena
+                    if (barWidth > 0) {
+                        doc.setFillColor(...AZUL);
+                        doc.roundedRect(14, y + 6, barWidth, 4, 2, 2, 'F');
+                    }
+
+                    // Porcentaje
+                    doc.setTextColor(...GRIS);
+                    doc.setFontSize(7);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`${pct}%`, W - 14, y + 9, { align: 'right' });
+
+                    y += 16;
+                });
+
+                y += 4;
+            }
+
+            // ── ÚLTIMOS ATENDIDOS ─────────────────────────────────────────────
+            const ultimos = datosEstadisticas.ultimos || [];
+            if (ultimos.length > 0) {
+                doc.setTextColor(...AZUL);
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Últimos Clientes Atendidos', 14, y);
+                y += 2;
+
+                doc.setDrawColor(...AZUL_CLARO);
+                doc.setLineWidth(0.5);
+                doc.line(14, y + 2, W - 14, y + 2);
+                y += 8;
+
+                // Encabezado tabla
+                doc.setFillColor(...AZUL);
+                doc.rect(14, y, W - 28, 8, 'F');
+                doc.setTextColor(...BLANCO);
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'bold');
+                doc.text('TICKET',  20,  y + 5.5);
+                doc.text('SERVICIO', 60, y + 5.5);
+                doc.text('HORA',    170, y + 5.5);
+                y += 8;
+
+                // Filas
+                ultimos.forEach((t, i) => {
+                    const bg = i % 2 === 0 ? BLANCO : [248, 250, 252];
+                    doc.setFillColor(...bg);
+                    doc.rect(14, y, W - 28, 8, 'F');
+
+                    doc.setTextColor(...AZUL);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(8);
+                    doc.text(t.codigo, 20, y + 5.5);
+
+                    doc.setTextColor(...GRIS);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(t.motivo, 60, y + 5.5);
+                    doc.text(`${t.hora} hs`, 170, y + 5.5);
+                    y += 8;
+                });
+            }
+
+            // ── FOOTER ───────────────────────────────────────────────────────
+            const pageH = 297;
+            doc.setFillColor(...AZUL);
+            doc.rect(0, pageH - 14, W, 14, 'F');
+            doc.setTextColor(...BLANCO);
+            doc.setFontSize(7);
+            doc.setFont('helvetica', 'normal');
+            doc.text('TurnoYa — Sala de Espera Virtual | Tecnicatura en Análisis de Sistemas 2026', W / 2, pageH - 5, { align: 'center' });
+
+            // ── GUARDAR ───────────────────────────────────────────────────────
+            const fechaArchivo = new Date().toISOString().slice(0, 10);
+            doc.save(`TurnoYa_Estadisticas_${nombreOperador.replace(' ', '_')}_${fechaArchivo}.pdf`);
+
+        } catch (err) {
+            console.error('[PDF] Error al generar:', err);
+            alert('Error al generar el PDF. Revisá la consola.');
+        } finally {
+            btn.classList.remove('cargando');
+        }
+    }
+
+    // ── INIT ─────────────────────────────────────────────────────────────────
+    document.getElementById('btn-exportar-pdf').addEventListener('click', exportarPDF);
     window.onload = cargarMisEstadisticas;
 </script>
 </body>

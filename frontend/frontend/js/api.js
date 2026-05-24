@@ -22,13 +22,16 @@ const api = {
   getUser()   { return JSON.parse(sessionStorage.getItem('user') || '{}'); },
 
   saveSession(data) {
+    const user = {
+        operador_id: parseInt(data.operador_id),
+        establecimiento_id: parseInt(data.establecimiento_id), 
+        username: data.username,
+        nombre: data.nombre, 
+        puesto: data.puesto, 
+        rol: data.rol
+    };
+    sessionStorage.setItem('user', JSON.stringify(user));
     sessionStorage.setItem('token', data.access_token);
-    sessionStorage.setItem('user', JSON.stringify({
-      rol:                data.rol,
-      nombre:             data.nombre,
-      operador_id:        data.operador_id,
-      establecimiento_id: data.establecimiento_id,
-    }));
   },
 
   clearSession() {
@@ -49,7 +52,7 @@ const api = {
     api.request('GET', `/turnos/posicion/${turnoId}`),
 
   getCola: (operadorId) =>
-    api.request('GET', `/turnos/cola/${operadorId}`),
+    api.request('GET', `/turnos/cola/${operadorId}`, null, api.getToken()),
 
   // --- NUEVO: Obtener estado para el Monitor ---
   getEstadoActual: (operadorId) =>
@@ -68,7 +71,10 @@ const api = {
 
   cancelarTurno: (turnoId) =>
     api.request('PATCH', `/turnos/${turnoId}/cancelar`, {}, api.getToken()),
-
+  
+  actualizarPushToken: (turnoId, pushToken) =>
+  api.request('PATCH', `/turnos/${turnoId}/push_token`, { push_token: pushToken }),
+  
   // --- GESTIÓN DE OPERADORES ---
   toggleFila: (operadorId) =>
     api.request('PATCH', `/operadores/${operadorId}/fila`, {}, api.getToken()),
@@ -89,8 +95,14 @@ const api = {
   eliminarOperador: (operadorId) =>
     api.request('DELETE', `/operadores/${operadorId}`, null, api.getToken()),
 
-  getQR: (operadorId, baseUrl) =>
-    `${API_URL}/operadores/${operadorId}/qr?base_url=${encodeURIComponent(baseUrl)}`,
+  getQR: async (operadorId, baseUrl) => {
+    const res = await fetch(
+      `${API_URL}/operadores/${operadorId}/qr?base_url=${encodeURIComponent(baseUrl)}`,
+       { headers: { 'Authorization': `Bearer ${api.getToken()}` } }
+    );
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+    return URL.createObjectURL(await res.blob());
+  },
 
   // --- ESTADÍSTICAS ---
   getEstadisticasHoy: (establecimientoId) =>
@@ -105,6 +117,12 @@ const api = {
   getEstadisticasOperadores: (establecimientoId) =>
     api.request('GET', `/estadisticas/${establecimientoId}/operadores`, null, api.getToken()),
 
+  getEstablecimiento: (establecimientoId) =>
+  api.request('GET', `/establecimientos/${establecimientoId}`, null, api.getToken()),
+ 
+  updateEstablecimiento: (establecimientoId, data) =>
+  api.request('PUT', `/establecimientos/${establecimientoId}`, data, api.getToken()),
+ 
   // --- WEBSOCKETS ---
   conectarWS(operadorId, onMessage) {
     let ws = null;

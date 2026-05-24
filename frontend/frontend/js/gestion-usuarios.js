@@ -80,9 +80,9 @@ function renderizarOperadores(operadores) {
           </button>
         </div>
         <div class="col-span-3 flex justify-end gap-2">
-          <a href="${api.getQR(op.id, baseUrl)}" target="_blank" class="p-2 rounded-full text-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all" title="Ver QR">
+          <button onclick="verQR(${op.id})" class="p-2 rounded-full text-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all" title="Ver QR">
             <span class="material-symbols-outlined">qr_code</span>
-          </a>
+          </button>
           <button onclick="window.location.href='abm.html?edit=${op.id}'" class="p-2 rounded-full text-slate-400 hover:text-primary hover:bg-blue-50 transition-all" title="Editar">
             <span class="material-symbols-outlined">edit</span>
           </button>
@@ -128,6 +128,15 @@ function setText(id, val) {
   const el = document.getElementById(id);
   if (el) el.innerText = val;
 }
+async function verQR(operadorId) {
+  try {
+    const url = await api.getQR(operadorId, baseUrl);
+    window.open(url, '_blank');
+  } catch (err) {
+    alert('Error al generar QR: ' + err.message);
+  }
+}
 
+window.verQR = verQR;
 window.toggleEstado      = toggleEstado;
 window.confirmarEliminar = confirmarEliminar;
