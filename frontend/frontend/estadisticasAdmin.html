@@ -207,32 +207,33 @@
       </button>
     </div>
   </main>
-
-<script type="module">
-    import api from './js/api.js';
-    const user = api.getUser(); // Esto ahora lee correctamente de sessionStorage
+  <script src="js/env.js"></script>
+  <script type="module">
+     import api from './js/api.js';
+     const user = api.getUser(); // Esto ahora lee correctamente de sessionStorage
     
-    if (user.nombre) {
-        document.getElementById('admin-nombre').innerText = user.nombre;
-        document.getElementById('admin-initials').innerText = user.nombre.charAt(0).toUpperCase();
-    }
+      if (user.nombre) {
+          document.getElementById('admin-nombre').innerText = user.nombre;
+         document.getElementById('admin-initials').innerText = user.nombre.charAt(0).toUpperCase();
+     }
   // Marca el link activo según el archivo HTML actual
-  const page = window.location.pathname.split('/').pop() || 'index.html';
-  const map = {
-    'AdminOperaciones.html':   'nav-operaciones',
-    'estadisticasAdmin.html':  'nav-estadisticas',
-    'AdminGestionUser.html':   'nav-usuarios',
-    'admin_configuracion.html':'nav-config',
-  };
-  const activeId = map[page];
-  if (activeId) {
-    document.getElementById(activeId)?.classList.add('active');
-  }
-    window.cerrarSesion = () => {
-        api.clearSession();
-        window.location.href = 'loginStaff.html';
+    const page = window.location.pathname.split('/').pop() || 'index.html';
+    const map = {
+      'AdminOperaciones.html':   'nav-operaciones',
+      'estadisticasAdmin.html':  'nav-estadisticas',
+     'AdminGestionUser.html':   'nav-usuarios',
+     'admin_configuracion.html':'nav-config',
     };
-</script>
+    const activeId = map[page];
+    if (activeId) {
+     document.getElementById(activeId)?.classList.add('active');
+    }
+     window.cerrarSesion = () => {
+         api.clearSession();
+         window.location.href = 'loginStaff.html';
+     };
+  </script>
+  
   <script type="module" src="js/estadisticas.admin.js"></script>
 </body>
 </html>

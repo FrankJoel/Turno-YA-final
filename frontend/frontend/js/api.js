@@ -1,6 +1,6 @@
 // js/api.js
 const API_URL = (typeof window !== 'undefined' && window.__ENV__?.VITE_API_URL)
-  || "http://localhost:8000";
+  || "https://turnoya-backend.onrender.com";
 
 const api = {
   async request(method, path, body = null, token = null) {

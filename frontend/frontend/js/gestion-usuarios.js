@@ -3,8 +3,7 @@ import api from './api.js';
 
 const user            = api.getUser();
 const establecimientoId = user.establecimiento_id || 1;
-const baseUrl = `${window.location.origin}/frontend/frontend`;
-
+const baseUrl = window.location.origin;
 let listaLocalOperadores = [];
 
 window.addEventListener('DOMContentLoaded', () => {
