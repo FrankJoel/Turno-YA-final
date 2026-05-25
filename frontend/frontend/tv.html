@@ -114,9 +114,9 @@
             </div>
         </div>
     </footer>
-
+    <script src="js/env.js"></script>
     <script>
-        const API = 'http://localhost:8000';
+        const API = window.__ENV__?.VITE_API_URL || 'https://turnoya-backend.onrender.com';
         let operadoresActivos = [];
 
         function actualizarReloj() {
@@ -271,6 +271,6 @@
 
         iniciar();
     </script>
-    <script src="js/env.js"></script>
+    
 </body>
 </html>

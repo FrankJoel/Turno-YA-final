@@ -9,8 +9,8 @@ const hora        = localStorage.getItem('cliente_hora') || '--:--';
 const operadorId  = parseInt(localStorage.getItem('cliente_operador_id') || '0');
 
 let wsConexion = null;
-let yaSonóAlerta = false; 
-let tiempoRestanteLocal = 0; 
+let yaSonóAlerta = false;
+let tiempoRestanteLocal = 0;
 let intervaloCuentaRegresiva = null;
 let yaFinalizado = false;
 
@@ -50,10 +50,13 @@ function init() {
 async function actualizarPosicion() {
   try {
     const data = await api.getPosicion(turnoId);
+
+    // Si el turno ya fue atendido o cancelado, mostramos la pantalla de finalizado
     if (data.estado === 'atendido' || data.estado === 'cancelado') {
       mostrarFinalizado();
       return;
     }
+
     const pos = Math.max(0, data.posicion);
     const espera = data.tiempo_estimado_minutos || (pos * 15);
     const codigoAtendiendo = data.codigo_atendiendo || '--';
@@ -74,29 +77,29 @@ async function actualizarPosicion() {
     }
 
     if (pos === 0) {
-      // ---  LÓGICA DE ATENDIENDO ---
+      // --- LÓGICA DE ATENDIENDO ---
       detenerCronometroLocal(); // Paramos la cuenta si ya pasó
       setText('tu-posicion', '¡Es tu turno!');
       setText('espera-min', '¡PASÁ!');
       setText('hora-estimada', 'Atención en curso');
       setBarWidth('progress-bar', 100);
-      
+
       const bar = document.getElementById('progress-bar');
       bar?.classList.remove('bg-primary');
       bar?.classList.add('bg-green-500');
-      
+
       if (!yaSonóAlerta) {
         reproducirSonido();
-        yaSonóAlerta = true; 
+        yaSonóAlerta = true;
       }
     } else {
       // --- LÓGICA DE ESPERA + CUENTA REGRESIVA ---
       setText('tu-posicion', pos);
-      yaSonóAlerta = false; 
+      yaSonóAlerta = false;
 
       // Actualizamos textos iniciales
       actualizarTextosTiempo(tiempoRestanteLocal);
-      
+
       // Iniciamos el segundero local para que baje minuto a minuto
       iniciarCronometroLocal(pos);
 
@@ -106,23 +109,31 @@ async function actualizarPosicion() {
     }
 
   } catch (err) {
-    console.warn('Turno finalizado o no encontrado');
-    mostrarFinalizado();
+    // Solo mostramos finalizado si es un error 404 (turno no existe)
+    // Si es un error de red/timeout, lo ignoramos silenciosamente para no
+    // mostrar "Turno Finalizado" por culpa de Render siendo lento
+    if (err.message && err.message.includes('404')) {
+      mostrarFinalizado();
+    } else {
+      console.warn('Error de red al consultar posición, reintentando...', err.message);
+    }
   }
 }
 
 function mostrarFinalizado() {
-    if (yaFinalizado) return; // ← evita que se ejecute más de una vez
-    yaFinalizado = true;
+  if (yaFinalizado) return; // Evita que se ejecute más de una vez
+  yaFinalizado = true;
 
-    const modal = document.getElementById('modal-finalizado');
-    if (modal) modal.classList.remove('hidden');
+  const modal = document.getElementById('modal-finalizado');
+  if (modal) modal.classList.remove('hidden');
 
-    setTimeout(() => {
-        limpiarSesionCliente();
-        window.location.href = 'index.html';
-    }, 120000);
+  // Redirige al inicio después de 2 minutos
+  setTimeout(() => {
+    limpiarSesionCliente();
+    window.location.href = 'index.html';
+  }, 120000);
 }
+
 async function cancelarTurno() {
   if (!confirm('¿Seguro que querés cancelar tu turno?')) return;
   try {
@@ -136,11 +147,12 @@ async function cancelarTurno() {
 }
 
 function limpiarSesionCliente() {
-  ['cliente_turno_id','cliente_turno_cod','cliente_nombre','cliente_hora','cliente_operador_id']
+  ['cliente_turno_id', 'cliente_turno_cod', 'cliente_nombre', 'cliente_hora', 'cliente_operador_id']
     .forEach(k => localStorage.removeItem(k));
 }
 
-// Helpers de UI
+// --- HELPERS DE UI ---
+
 function setText(id, val) {
   const el = document.getElementById(id);
   if (el) el.innerText = val;
@@ -157,6 +169,7 @@ function reproducirSonido() {
     audio.play().catch(e => console.log("Audio bloqueado por el navegador"));
   } catch {}
 }
+
 function iniciarCronometroLocal(posicionActual) {
   // Limpiamos cualquier intervalo previo para no duplicar
   if (intervaloCuentaRegresiva) clearInterval(intervaloCuentaRegresiva);
@@ -166,7 +179,7 @@ function iniciarCronometroLocal(posicionActual) {
       tiempoRestanteLocal -= 1;
       actualizarTextosTiempo(tiempoRestanteLocal);
 
-      // Hacemos que la barra avance un 0.5% cada minuto 
+      // Hacemos que la barra avance un 0.5% cada minuto
       // para que el cliente vea que el sistema está "vivo"
       const bar = document.getElementById('progress-bar');
       if (bar) {
@@ -187,6 +200,7 @@ function actualizarTextosTiempo(min) {
   setText('espera-min', `${min} min`);
   setText('hora-estimada', `~${min} min`);
 }
+
 async function pedirPermisoNotificaciones() {
   if (!('Notification' in window)) return;
   if (Notification.permission === 'default') {
