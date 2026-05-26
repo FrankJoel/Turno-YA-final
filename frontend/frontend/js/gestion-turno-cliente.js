@@ -211,7 +211,7 @@ function calcularHoraEstimada(minutosEspera) {
 function actualizarTextosTiempo(min) {
   setText('espera-min', `${min} min`);
   const horaEstimada = calcularHoraEstimada(min);
-  setText('hora-estimada', `~${horaEstimada} hs`);
+  setText('hora-estimada', `${horaEstimada} hs`);
 }
 
 async function pedirPermisoNotificaciones() {
