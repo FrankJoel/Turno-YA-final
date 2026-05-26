@@ -114,11 +114,13 @@
             </div>
         </div>
     </footer>
+
     <script src="js/env.js"></script>
     <script>
         const API = window.__ENV__?.VITE_API_URL || 'https://turnoya-backend.onrender.com';
         let operadoresActivos = [];
 
+        // --- RELOJ ---
         function actualizarReloj() {
             const ahora = new Date();
             let h = ahora.getHours();
@@ -133,6 +135,10 @@
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
 
+        // --- SINCRONIZACIÓN CON EL BACKEND ---
+        // Usamos polling en lugar de WebSocket porque Render gratuito
+        // no mantiene conexiones WS abiertas por más de unos segundos.
+        // Cada 5 segundos consultamos el estado real de todos los operadores.
         async function sincronizarEstado() {
             try {
                 let turnoPrincipal = null;
@@ -140,29 +146,37 @@
                 let todosLosAtendiendo = [];
 
                 for (const op of operadoresActivos) {
-                    // 1. Cambiamos a la ruta exacta de tu backend: estado_actual
+                    // 1. Estado actual del puesto (llamando o atendiendo)
                     const resA = await fetch(`${API}/turnos/estado_actual/${op.id}`);
                     const atendiendo = await resA.json();
-                    
+
                     if (atendiendo && atendiendo.codigo) {
                         const tObj = { ...atendiendo, nombreOp: op.nombre };
                         todosLosAtendiendo.push(tObj);
+                        // Priorizamos el turno en estado 'llamando' para mostrarlo grande
                         if (!turnoPrincipal || tObj.estado === 'llamando') {
                             turnoPrincipal = tObj;
                         }
                     }
 
-                    // 2. Obtener Cola
+                    // 2. Cola de espera del operador
                     const resC = await fetch(`${API}/turnos/cola/${op.id}`);
                     const cola = await resC.json();
                     if (Array.isArray(cola)) {
                         cola.forEach(t => todosLosEnEspera.push({ ...t, nombreOp: op.nombre }));
                     }
                 }
+
                 renderPantalla(turnoPrincipal, todosLosAtendiendo, todosLosEnEspera);
-            } catch (e) { console.error("Error sincronizando:", e); }
+                setStatus(`${operadoresActivos.length} activos`, true);
+
+            } catch (e) {
+                console.error("Error sincronizando:", e);
+                setStatus('Error de conexión', false);
+            }
         }
 
+        // --- RENDER ---
         function renderPantalla(principal, atendiendo, espera) {
             const tG = document.getElementById('turno-grande');
             const lE = document.getElementById('label-estado');
@@ -188,11 +202,13 @@
             } else {
                 tG.innerText = "---";
                 pG.innerText = "---";
-                lE.innerText = "Atendiendo Ahora";
+                lE.innerText = "Esperando...";
                 dot.classList.add('hidden');
                 tG.style.color = '';
+                tG.classList.remove('animate-blink');
             }
 
+            // Historial de turnos activos (llamando + atendiendo)
             const hLista = document.getElementById('historial-lista');
             if (atendiendo.length === 0) {
                 hLista.innerHTML = '<p class="col-span-3 text-center text-outline text-sm py-3">Sin actividad</p>';
@@ -205,6 +221,7 @@
                 `).join('');
             }
 
+            // Cola de espera
             const cLista = document.getElementById('cola-espera');
             if (espera.length === 0) {
                 cLista.innerHTML = '<div class="text-center text-outline py-10"><p class="text-lg font-bold">No hay turnos en fila</p></div>';
@@ -218,59 +235,45 @@
             }
         }
 
-        function conectarWS(op) {
-            const wsBase = API.replace(/^http/, 'ws');
-            const ws = new WebSocket(`${wsBase}/ws/${op.id}`);
-
-            ws.onmessage = (e) => {
-                const data = JSON.parse(e.data);
-                // Mapeo de eventos según tu turno.py
-                const eventosValidos = ['siguiente_turno', 'turno_atendiendo', 'turno_finalizado', 'turno_cancelado', 'nuevo_turno'];
-                
-                if (eventosValidos.includes(data.evento)) {
-                    if (data.evento === 'siguiente_turno') reproducirSonido();
-                    sincronizarEstado();
-                }
-            };
-            ws.onclose = () => setTimeout(() => conectarWS(op), 3000);
-        }
-
+        // --- STATUS BADGE ---
         function setStatus(msg, ok) {
             const el = document.getElementById('ws-status');
             el.innerText = msg;
             el.className = `text-[10px] px-3 py-1 rounded-full font-bold uppercase ${ok ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'}`;
         }
 
+        // --- INICIO ---
         async function iniciar() {
             try {
+                // Cargamos los operadores activos del establecimiento
                 const res = await fetch(`${API}/operadores/?establecimiento_id=1`);
                 const todos = await res.json();
                 operadoresActivos = todos.filter(op => op.activo && op.rol !== 'admin');
-                
+
                 if (operadoresActivos.length > 0) {
-                    setStatus(`${operadoresActivos.length} activos`, true);
+                    // Primera sincronización inmediata
                     await sincronizarEstado();
-                    operadoresActivos.forEach(conectarWS);
+                    // Polling cada 5 segundos — reemplaza al WebSocket que Render no soporta en plan gratuito
+                    setInterval(sincronizarEstado, 5000);
                 } else {
                     setStatus('Sin operadores', false);
                 }
             } catch (e) {
                 setStatus('Error de conexión', false);
+                // Reintentamos iniciar después de 5 segundos si falla
                 setTimeout(iniciar, 5000);
             }
         }
 
-        function reproducirSonido() {
-            try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(()=>{}); } catch(e){}
-        }
-
+        // Desbloqueamos el audio en el primer click del usuario
+        // (los navegadores bloquean audio sin interacción previa)
         document.body.addEventListener('click', () => {
             const a = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-            a.volume = 0; a.play().then(() => a.pause());
+            a.volume = 0; a.play().then(() => a.pause()).catch(()=>{});
         }, { once: true });
 
         iniciar();
     </script>
-    
+
 </body>
 </html>
