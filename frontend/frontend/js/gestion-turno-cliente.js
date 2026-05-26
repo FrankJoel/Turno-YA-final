@@ -97,7 +97,7 @@ async function actualizarPosicion() {
       setText('tu-posicion', pos);
       yaSonóAlerta = false;
 
-      // Actualizamos textos iniciales
+      // Actualizamos textos con minutos y hora estimada calculada
       actualizarTextosTiempo(tiempoRestanteLocal);
 
       // Iniciamos el segundero local para que baje minuto a minuto
@@ -177,10 +177,10 @@ function iniciarCronometroLocal(posicionActual) {
   intervaloCuentaRegresiva = setInterval(() => {
     if (tiempoRestanteLocal > 1) {
       tiempoRestanteLocal -= 1;
+      // Actualizamos tanto los minutos como la hora estimada cada minuto
       actualizarTextosTiempo(tiempoRestanteLocal);
 
       // Hacemos que la barra avance un 0.5% cada minuto
-      // para que el cliente vea que el sistema está "vivo"
       const bar = document.getElementById('progress-bar');
       if (bar) {
         const currentWidth = parseFloat(bar.style.width) || 5;
@@ -196,9 +196,22 @@ function detenerCronometroLocal() {
   if (intervaloCuentaRegresiva) clearInterval(intervaloCuentaRegresiva);
 }
 
+// Suma minutos a la hora actual y devuelve formato "HH:MM"
+function calcularHoraEstimada(minutosEspera) {
+  const ahora = new Date();
+  ahora.setMinutes(ahora.getMinutes() + minutosEspera);
+  const horas = String(ahora.getHours()).padStart(2, '0');
+  const minutos = String(ahora.getMinutes()).padStart(2, '0');
+  return `${horas}:${minutos}`;
+}
+
+// Actualiza los textos de tiempo en pantalla:
+// - espera-min: muestra los minutos restantes (ej: "40 min")
+// - hora-estimada: muestra la hora exacta calculada (ej: "~15:30 hs")
 function actualizarTextosTiempo(min) {
   setText('espera-min', `${min} min`);
-  setText('hora-estimada', `~${min} min`);
+  const horaEstimada = calcularHoraEstimada(min);
+  setText('hora-estimada', `~${horaEstimada} hs`);
 }
 
 async function pedirPermisoNotificaciones() {
