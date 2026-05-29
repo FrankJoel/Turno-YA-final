@@ -1,3 +1,4 @@
+// js/registro-cliente.js
 import api from './api.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -17,24 +18,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!operadorId || isNaN(operadorId) || !estIdParam || isNaN(estIdParam)) {
         console.error("ERROR: QR incompleto.");
         mostrarErrorGlobal("El código QR es inválido o está incompleto.");
-        return; 
+        return;
     }
 
     establecimientoIdDinamico = estIdParam;
 
     // 1. Carga de datos del operador y servicios
     try {
-        const dataOp = await api.request('GET', `/operadores/${operadorId}`); 
-        
+        const dataOp = await api.request('GET', `/operadores/${operadorId}`);
+
         // Sincronizamos el ID del establecimiento desde la DB
-        establecimientoIdDinamico = dataOp.establecimiento_id; 
+        establecimientoIdDinamico = dataOp.establecimiento_id;
 
         if (dataOp.servicios && dataOp.servicios.length > 0) {
             selectMotivo.innerHTML = '<option value="" disabled selected>Seleccioná un motivo...</option>';
 
             dataOp.servicios.forEach(s => {
                 const opt = document.createElement('option');
-                opt.value = s.motivo; 
+                opt.value = s.motivo;
                 const tiempoValido = /^\d{1,2}:\d{2}$|^\d+$/.test(s.tiempo_estimado?.trim());
                 opt.innerText = tiempoValido
                     ? `${s.motivo} (${s.tiempo_estimado} min)`
@@ -50,7 +51,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         mostrarErrorGlobal("Error al conectar con el servidor.");
     }
 
-    // 2. Manejo del envío del formulario
+    // 2. Verificación de turno activo al salir del campo DNI
+    // Si el cliente ya tiene un turno activo con este operador,
+    // le avisamos y lo redirigimos a miTurno.html en lugar de sacar uno nuevo
+    document.getElementById('dni').addEventListener('blur', async () => {
+        const dni = document.getElementById('dni').value.trim();
+        if (!dni || dni.length < 6) return;
+
+        try {
+            const turnoExistente = await api.buscarTurnoPorDni(dni, operadorId);
+
+            if (turnoExistente && turnoExistente.id) {
+                // Restauramos la sesión del cliente con el turno existente
+                localStorage.setItem('cliente_turno_id', turnoExistente.id);
+                localStorage.setItem('cliente_turno_cod', turnoExistente.codigo);
+                localStorage.setItem('cliente_nombre', turnoExistente.nombre_cliente);
+                localStorage.setItem('cliente_operador_id', operadorId);
+                const ahora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                localStorage.setItem('cliente_hora', ahora);
+
+                if (confirm(`Ya tenés el turno ${turnoExistente.codigo} activo. ¿Querés verlo?`)) {
+                    window.location.href = 'miTurno.html';
+                }
+            }
+        } catch (err) {
+            // Si da 404 significa que no tiene turno activo — dejamos seguir normalmente
+            console.log('Sin turno activo para este DNI, puede registrarse.');
+        }
+    });
+
+    // 3. Manejo del envío del formulario
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -76,19 +106,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 nombre_cliente: nombre,
                 motivo: motivo,
                 operador_id: operadorId,
-                establecimiento_id: establecimientoIdDinamico 
+                establecimiento_id: establecimientoIdDinamico
             });
+
             console.log('Turno creado:', turno);
+
             if ('serviceWorker' in navigator && 'PushManager' in window) {
                 await suscribirNotificaciones(turno.id);
             }
-            
-            // GUARDADO DE SESIÓN (Crítico para miTurno.html)
+
+            // GUARDADO DE SESIÓN (crítico para que miTurno.html funcione)
             localStorage.setItem('cliente_turno_id', turno.id);
             localStorage.setItem('cliente_turno_cod', turno.codigo);
             localStorage.setItem('cliente_nombre', nombre);
             localStorage.setItem('cliente_operador_id', operadorId);
-            
+
             const ahora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             localStorage.setItem('cliente_hora', ahora);
 
@@ -120,30 +152,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         alerta.innerText = msg;
         setTimeout(() => alerta?.remove(), 4000);
     }
+
     async function suscribirNotificaciones(turnoId) {
-    try {
-        // 1. Pedir clave pública VAPID al backend
-        const config = await api.request('GET', '/config/vapid-public-key');
-        const vapidPublicKey = config.public_key;
+        try {
+            // 1. Pedir clave pública VAPID al backend
+            const config = await api.request('GET', '/config/vapid-public-key');
+            const vapidPublicKey = config.public_key;
 
-        // 2. Registrar el Service Worker
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        await navigator.serviceWorker.ready;
+            // 2. Registrar el Service Worker
+            const registration = await navigator.serviceWorker.register('/sw.js');
+            await navigator.serviceWorker.ready;
 
-        // 3. Suscribirse al push
-        const suscripcion = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: vapidPublicKey
-        });
+            // 3. Suscribirse al push
+            const suscripcion = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: vapidPublicKey
+            });
 
-        // 4. Enviar el token al backend
-        await api.actualizarPushToken(turnoId, JSON.stringify(suscripcion));
-        console.log('Suscripción push registrada correctamente.');
+            // 4. Enviar el token al backend
+            await api.actualizarPushToken(turnoId, JSON.stringify(suscripcion));
+            console.log('Suscripción push registrada correctamente.');
 
-    } catch (err) {
-        console.warn('No se pudo suscribir a notificaciones push:', err);
+        } catch (err) {
+            console.warn('No se pudo suscribir a notificaciones push:', err);
+        }
     }
-}
+
     function mostrarErrorGlobal(msg) {
         const contenedor = document.querySelector('main') || document.body;
         contenedor.innerHTML = `
