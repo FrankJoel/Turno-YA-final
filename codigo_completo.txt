@@ -94,10 +94,10 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./turnoya.db")
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False}
-)
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    engine = create_engine(DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -1841,6 +1841,7 @@ manager = ConnectionManager()
       window.location.href = 'loginStaff.html';
     }
   </script>
+  <script src="js/env.js"></script>
   <script type="module" src="js/alta-operador.js"></script>
 </body>
 </html>
@@ -2031,6 +2032,7 @@ manager = ConnectionManager()
       window.location.href = 'loginStaff.html';
     }
   </script>
+  <script src="js/env.js"></script>
   <script type="module" src="js/gestion-usuarios.js"></script>
 </body>
 </html>
@@ -2220,6 +2222,7 @@ manager = ConnectionManager()
       window.location.href = 'loginStaff.html';
     }
   </script>
+  <script src="js/env.js"></script>
   <script type="module" src="js/monitor-operaciones.js"></script>
 </body>
 </html>
@@ -2429,6 +2432,7 @@ manager = ConnectionManager()
 </div>
 
 <!-- ── SCRIPT ─────────────────────────────────────────────────────────────── -->
+<script src="js/env.js"></script>
 <script type="module">
   import api from './js/api.js';
 
@@ -2688,6 +2692,7 @@ manager = ConnectionManager()
         </div>
     </main>
 
+<script src="js/env.js"></script>
 <script type="module">
     import api from './js/api.js';
 
@@ -3156,32 +3161,33 @@ manager = ConnectionManager()
       </button>
     </div>
   </main>
-
-<script type="module">
-    import api from './js/api.js';
-    const user = api.getUser(); // Esto ahora lee correctamente de sessionStorage
+  <script src="js/env.js"></script>
+  <script type="module">
+     import api from './js/api.js';
+     const user = api.getUser(); // Esto ahora lee correctamente de sessionStorage
     
-    if (user.nombre) {
-        document.getElementById('admin-nombre').innerText = user.nombre;
-        document.getElementById('admin-initials').innerText = user.nombre.charAt(0).toUpperCase();
-    }
+      if (user.nombre) {
+          document.getElementById('admin-nombre').innerText = user.nombre;
+         document.getElementById('admin-initials').innerText = user.nombre.charAt(0).toUpperCase();
+     }
   // Marca el link activo según el archivo HTML actual
-  const page = window.location.pathname.split('/').pop() || 'index.html';
-  const map = {
-    'AdminOperaciones.html':   'nav-operaciones',
-    'estadisticasAdmin.html':  'nav-estadisticas',
-    'AdminGestionUser.html':   'nav-usuarios',
-    'admin_configuracion.html':'nav-config',
-  };
-  const activeId = map[page];
-  if (activeId) {
-    document.getElementById(activeId)?.classList.add('active');
-  }
-    window.cerrarSesion = () => {
-        api.clearSession();
-        window.location.href = 'loginStaff.html';
+    const page = window.location.pathname.split('/').pop() || 'index.html';
+    const map = {
+      'AdminOperaciones.html':   'nav-operaciones',
+      'estadisticasAdmin.html':  'nav-estadisticas',
+     'AdminGestionUser.html':   'nav-usuarios',
+     'admin_configuracion.html':'nav-config',
     };
-</script>
+    const activeId = map[page];
+    if (activeId) {
+     document.getElementById(activeId)?.classList.add('active');
+    }
+     window.cerrarSesion = () => {
+         api.clearSession();
+         window.location.href = 'loginStaff.html';
+     };
+  </script>
+  
   <script type="module" src="js/estadisticas.admin.js"></script>
 </body>
 </html>
@@ -3318,7 +3324,7 @@ manager = ConnectionManager()
     </div>
 
   </main>
-
+  <script src="js/env.js"></script>
   <script type="module" src="js/registro-cliente.js"></script>
 </body>
 </html>
@@ -3422,7 +3428,7 @@ manager = ConnectionManager()
   <footer class="w-full py-8 text-center mt-auto">
     <p class="text-sm text-on-surface/40">© 2026 TurnoYa. Todos los derechos reservados.</p>
   </footer>
-
+  <script src="js/env.js"></script>
   <script type="module" src="js/admin.js"></script>
 </body>
 </html>
@@ -3587,7 +3593,7 @@ manager = ConnectionManager()
           </button>
       </div>
   </div>
-
+  <script src="js/env.js"></script>
   <script type="module" src="js/gestion-turno-cliente.js"></script>
 </body>
 </html>
@@ -3734,7 +3740,7 @@ manager = ConnectionManager()
       </div>
     </div>
   </main>
-
+<script src="js/env.js"></script>
 <script type="module">
     import api from './js/api.js';
     const user = api.getUser();
@@ -3921,10 +3927,12 @@ manager = ConnectionManager()
         </div>
     </footer>
 
+    <script src="js/env.js"></script>
     <script>
-        const API = 'http://localhost:8000';
+        const API = window.__ENV__?.VITE_API_URL || 'https://turnoya-backend.onrender.com';
         let operadoresActivos = [];
 
+        // --- RELOJ ---
         function actualizarReloj() {
             const ahora = new Date();
             let h = ahora.getHours();
@@ -3939,6 +3947,10 @@ manager = ConnectionManager()
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
 
+        // --- SINCRONIZACIÓN CON EL BACKEND ---
+        // Usamos polling en lugar de WebSocket porque Render gratuito
+        // no mantiene conexiones WS abiertas por más de unos segundos.
+        // Cada 5 segundos consultamos el estado real de todos los operadores.
         async function sincronizarEstado() {
             try {
                 let turnoPrincipal = null;
@@ -3946,29 +3958,37 @@ manager = ConnectionManager()
                 let todosLosAtendiendo = [];
 
                 for (const op of operadoresActivos) {
-                    // 1. Cambiamos a la ruta exacta de tu backend: estado_actual
+                    // 1. Estado actual del puesto (llamando o atendiendo)
                     const resA = await fetch(`${API}/turnos/estado_actual/${op.id}`);
                     const atendiendo = await resA.json();
-                    
+
                     if (atendiendo && atendiendo.codigo) {
                         const tObj = { ...atendiendo, nombreOp: op.nombre };
                         todosLosAtendiendo.push(tObj);
+                        // Priorizamos el turno en estado 'llamando' para mostrarlo grande
                         if (!turnoPrincipal || tObj.estado === 'llamando') {
                             turnoPrincipal = tObj;
                         }
                     }
 
-                    // 2. Obtener Cola
+                    // 2. Cola de espera del operador
                     const resC = await fetch(`${API}/turnos/cola/${op.id}`);
                     const cola = await resC.json();
                     if (Array.isArray(cola)) {
                         cola.forEach(t => todosLosEnEspera.push({ ...t, nombreOp: op.nombre }));
                     }
                 }
+
                 renderPantalla(turnoPrincipal, todosLosAtendiendo, todosLosEnEspera);
-            } catch (e) { console.error("Error sincronizando:", e); }
+                setStatus(`${operadoresActivos.length} activos`, true);
+
+            } catch (e) {
+                console.error("Error sincronizando:", e);
+                setStatus('Error de conexión', false);
+            }
         }
 
+        // --- RENDER ---
         function renderPantalla(principal, atendiendo, espera) {
             const tG = document.getElementById('turno-grande');
             const lE = document.getElementById('label-estado');
@@ -3994,11 +4014,13 @@ manager = ConnectionManager()
             } else {
                 tG.innerText = "---";
                 pG.innerText = "---";
-                lE.innerText = "Atendiendo Ahora";
+                lE.innerText = "Esperando...";
                 dot.classList.add('hidden');
                 tG.style.color = '';
+                tG.classList.remove('animate-blink');
             }
 
+            // Historial de turnos activos (llamando + atendiendo)
             const hLista = document.getElementById('historial-lista');
             if (atendiendo.length === 0) {
                 hLista.innerHTML = '<p class="col-span-3 text-center text-outline text-sm py-3">Sin actividad</p>';
@@ -4011,6 +4033,7 @@ manager = ConnectionManager()
                 `).join('');
             }
 
+            // Cola de espera
             const cLista = document.getElementById('cola-espera');
             if (espera.length === 0) {
                 cLista.innerHTML = '<div class="text-center text-outline py-10"><p class="text-lg font-bold">No hay turnos en fila</p></div>';
@@ -4024,59 +4047,46 @@ manager = ConnectionManager()
             }
         }
 
-        function conectarWS(op) {
-            const wsBase = API.replace(/^http/, 'ws');
-            const ws = new WebSocket(`${wsBase}/ws/${op.id}`);
-
-            ws.onmessage = (e) => {
-                const data = JSON.parse(e.data);
-                // Mapeo de eventos según tu turno.py
-                const eventosValidos = ['siguiente_turno', 'turno_atendiendo', 'turno_finalizado', 'turno_cancelado', 'nuevo_turno'];
-                
-                if (eventosValidos.includes(data.evento)) {
-                    if (data.evento === 'siguiente_turno') reproducirSonido();
-                    sincronizarEstado();
-                }
-            };
-            ws.onclose = () => setTimeout(() => conectarWS(op), 3000);
-        }
-
+        // --- STATUS BADGE ---
         function setStatus(msg, ok) {
             const el = document.getElementById('ws-status');
             el.innerText = msg;
             el.className = `text-[10px] px-3 py-1 rounded-full font-bold uppercase ${ok ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'}`;
         }
 
+        // --- INICIO ---
         async function iniciar() {
             try {
+                // Cargamos los operadores activos del establecimiento
                 const res = await fetch(`${API}/operadores/?establecimiento_id=1`);
                 const todos = await res.json();
                 operadoresActivos = todos.filter(op => op.activo && op.rol !== 'admin');
-                
+
                 if (operadoresActivos.length > 0) {
-                    setStatus(`${operadoresActivos.length} activos`, true);
+                    // Primera sincronización inmediata
                     await sincronizarEstado();
-                    operadoresActivos.forEach(conectarWS);
+                    // Polling cada 5 segundos — reemplaza al WebSocket que Render no soporta en plan gratuito
+                    setInterval(sincronizarEstado, 5000);
                 } else {
                     setStatus('Sin operadores', false);
                 }
             } catch (e) {
                 setStatus('Error de conexión', false);
+                // Reintentamos iniciar después de 5 segundos si falla
                 setTimeout(iniciar, 5000);
             }
         }
 
-        function reproducirSonido() {
-            try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(()=>{}); } catch(e){}
-        }
-
+        // Desbloqueamos el audio en el primer click del usuario
+        // (los navegadores bloquean audio sin interacción previa)
         document.body.addEventListener('click', () => {
             const a = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-            a.volume = 0; a.play().then(() => a.pause());
+            a.volume = 0; a.play().then(() => a.pause()).catch(()=>{});
         }, { once: true });
 
         iniciar();
     </script>
+
 </body>
 </html>
 
@@ -4731,7 +4741,7 @@ window.generarQR = async function() {
 
 // js/api.js
 const API_URL = (typeof window !== 'undefined' && window.__ENV__?.VITE_API_URL)
-  || "http://localhost:8000";
+  || "https://turnoya-backend.onrender.com";
 
 const api = {
   async request(method, path, body = null, token = null) {
@@ -4881,6 +4891,15 @@ const api = {
 };
 
 export default api;
+
+
+// =====================================================
+// ARCHIVO: frontend\frontend\js\env.js
+// =====================================================
+
+window.__ENV__ = {
+  VITE_API_URL: "https://turnoya-backend.onrender.com"
+};
 
 
 // =====================================================
@@ -5272,8 +5291,8 @@ const hora        = localStorage.getItem('cliente_hora') || '--:--';
 const operadorId  = parseInt(localStorage.getItem('cliente_operador_id') || '0');
 
 let wsConexion = null;
-let yaSonóAlerta = false; 
-let tiempoRestanteLocal = 0; 
+let yaSonóAlerta = false;
+let tiempoRestanteLocal = 0;
 let intervaloCuentaRegresiva = null;
 let yaFinalizado = false;
 
@@ -5313,10 +5332,13 @@ function init() {
 async function actualizarPosicion() {
   try {
     const data = await api.getPosicion(turnoId);
+
+    // Si el turno ya fue atendido o cancelado, mostramos la pantalla de finalizado
     if (data.estado === 'atendido' || data.estado === 'cancelado') {
       mostrarFinalizado();
       return;
     }
+
     const pos = Math.max(0, data.posicion);
     const espera = data.tiempo_estimado_minutos || (pos * 15);
     const codigoAtendiendo = data.codigo_atendiendo || '--';
@@ -5337,29 +5359,29 @@ async function actualizarPosicion() {
     }
 
     if (pos === 0) {
-      // ---  LÓGICA DE ATENDIENDO ---
+      // --- LÓGICA DE ATENDIENDO ---
       detenerCronometroLocal(); // Paramos la cuenta si ya pasó
       setText('tu-posicion', '¡Es tu turno!');
       setText('espera-min', '¡PASÁ!');
       setText('hora-estimada', 'Atención en curso');
       setBarWidth('progress-bar', 100);
-      
+
       const bar = document.getElementById('progress-bar');
       bar?.classList.remove('bg-primary');
       bar?.classList.add('bg-green-500');
-      
+
       if (!yaSonóAlerta) {
         reproducirSonido();
-        yaSonóAlerta = true; 
+        yaSonóAlerta = true;
       }
     } else {
       // --- LÓGICA DE ESPERA + CUENTA REGRESIVA ---
       setText('tu-posicion', pos);
-      yaSonóAlerta = false; 
+      yaSonóAlerta = false;
 
-      // Actualizamos textos iniciales
+      // Actualizamos textos con minutos y hora estimada calculada
       actualizarTextosTiempo(tiempoRestanteLocal);
-      
+
       // Iniciamos el segundero local para que baje minuto a minuto
       iniciarCronometroLocal(pos);
 
@@ -5369,23 +5391,31 @@ async function actualizarPosicion() {
     }
 
   } catch (err) {
-    console.warn('Turno finalizado o no encontrado');
-    mostrarFinalizado();
+    // Solo mostramos finalizado si es un error 404 (turno no existe)
+    // Si es un error de red/timeout, lo ignoramos silenciosamente para no
+    // mostrar "Turno Finalizado" por culpa de Render siendo lento
+    if (err.message && err.message.includes('404')) {
+      mostrarFinalizado();
+    } else {
+      console.warn('Error de red al consultar posición, reintentando...', err.message);
+    }
   }
 }
 
 function mostrarFinalizado() {
-    if (yaFinalizado) return; // ← evita que se ejecute más de una vez
-    yaFinalizado = true;
+  if (yaFinalizado) return; // Evita que se ejecute más de una vez
+  yaFinalizado = true;
 
-    const modal = document.getElementById('modal-finalizado');
-    if (modal) modal.classList.remove('hidden');
+  const modal = document.getElementById('modal-finalizado');
+  if (modal) modal.classList.remove('hidden');
 
-    setTimeout(() => {
-        limpiarSesionCliente();
-        window.location.href = 'index.html';
-    }, 120000);
+  // Redirige al inicio después de 2 minutos
+  setTimeout(() => {
+    limpiarSesionCliente();
+    window.location.href = 'index.html';
+  }, 120000);
 }
+
 async function cancelarTurno() {
   if (!confirm('¿Seguro que querés cancelar tu turno?')) return;
   try {
@@ -5399,11 +5429,12 @@ async function cancelarTurno() {
 }
 
 function limpiarSesionCliente() {
-  ['cliente_turno_id','cliente_turno_cod','cliente_nombre','cliente_hora','cliente_operador_id']
+  ['cliente_turno_id', 'cliente_turno_cod', 'cliente_nombre', 'cliente_hora', 'cliente_operador_id']
     .forEach(k => localStorage.removeItem(k));
 }
 
-// Helpers de UI
+// --- HELPERS DE UI ---
+
 function setText(id, val) {
   const el = document.getElementById(id);
   if (el) el.innerText = val;
@@ -5420,6 +5451,7 @@ function reproducirSonido() {
     audio.play().catch(e => console.log("Audio bloqueado por el navegador"));
   } catch {}
 }
+
 function iniciarCronometroLocal(posicionActual) {
   // Limpiamos cualquier intervalo previo para no duplicar
   if (intervaloCuentaRegresiva) clearInterval(intervaloCuentaRegresiva);
@@ -5427,10 +5459,10 @@ function iniciarCronometroLocal(posicionActual) {
   intervaloCuentaRegresiva = setInterval(() => {
     if (tiempoRestanteLocal > 1) {
       tiempoRestanteLocal -= 1;
+      // Actualizamos tanto los minutos como la hora estimada cada minuto
       actualizarTextosTiempo(tiempoRestanteLocal);
 
-      // Hacemos que la barra avance un 0.5% cada minuto 
-      // para que el cliente vea que el sistema está "vivo"
+      // Hacemos que la barra avance un 0.5% cada minuto
       const bar = document.getElementById('progress-bar');
       if (bar) {
         const currentWidth = parseFloat(bar.style.width) || 5;
@@ -5446,10 +5478,24 @@ function detenerCronometroLocal() {
   if (intervaloCuentaRegresiva) clearInterval(intervaloCuentaRegresiva);
 }
 
+// Suma minutos a la hora actual y devuelve formato "HH:MM"
+function calcularHoraEstimada(minutosEspera) {
+  const ahora = new Date();
+  ahora.setMinutes(ahora.getMinutes() + minutosEspera);
+  const horas = String(ahora.getHours()).padStart(2, '0');
+  const minutos = String(ahora.getMinutes()).padStart(2, '0');
+  return `${horas}:${minutos}`;
+}
+
+// Actualiza los textos de tiempo en pantalla:
+// - espera-min: muestra los minutos restantes (ej: "40 min")
+// - hora-estimada: muestra la hora exacta calculada (ej: "~15:30 hs")
 function actualizarTextosTiempo(min) {
   setText('espera-min', `${min} min`);
-  setText('hora-estimada', `~${min} min`);
+  const horaEstimada = calcularHoraEstimada(min);
+  setText('hora-estimada', `${horaEstimada} hs`);
 }
+
 async function pedirPermisoNotificaciones() {
   if (!('Notification' in window)) return;
   if (Notification.permission === 'default') {
@@ -5479,8 +5525,7 @@ import api from './api.js';
 
 const user            = api.getUser();
 const establecimientoId = user.establecimiento_id || 1;
-const baseUrl = `${window.location.origin}/frontend/frontend`;
-
+const baseUrl = window.location.origin;
 let listaLocalOperadores = [];
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -5756,7 +5801,9 @@ function setText(id, val) {
 // js/operador.js
 import api from './api.js';
 
-let turnoActualId = null;
+// --- ESTADO GLOBAL ---
+let turnoActualId = null;  // ID del turno activo en el puesto
+let actualizando = false;  // Flag para evitar llamadas simultáneas al backend
 const user = api.getUser();
 const params = new URLSearchParams(window.location.search);
 const operadorId = parseInt(user.operador_id || params.get('op') || '0');
@@ -5768,22 +5815,35 @@ if (!operadorId) {
 
 // --- INICIALIZACIÓN ---
 window.addEventListener('DOMContentLoaded', async () => {
+    // Cargamos el nombre, puesto y estado de fila del operador
     await cargarInfoOperador();
-    await actualizarPantallaOperador(); // Esta reemplaza a cargarCola inicial
+
+    // Cargamos el estado actual de la pantalla (turno en curso + cola)
+    await actualizarPantallaOperador();
     
-    // Intervalo para refrescar la lista de espera
+    // Refresco automático cada 15 segundos como respaldo al WebSocket
     setInterval(actualizarPantallaOperador, 15000);
 
+    // Link a estadísticas personales del operador
     const linkStats = document.getElementById('link-stats');
     if (linkStats) linkStats.href = `estadisticaoperador.html?op=${operadorId}`;
 
-    // WebSocket en tiempo real
-    api.conectarWS(operadorId, (data) => {
-        // Si hay cambios en la fila, refrescamos todo el panel
-        actualizarPantallaOperador();
+    // WebSocket en tiempo real — escucha eventos del backend
+    api.conectarWS(operadorId, async (data) => {
+        // Solo reaccionamos a eventos relevantes para esta pantalla
+        const eventosRelevantes = ['siguiente_turno', 'turno_atendiendo', 'turno_finalizado', 'turno_cancelado', 'nuevo_turno'];
+        if (!eventosRelevantes.includes(data.evento)) return;
+
+        // Si ya hay una actualización en curso, ignoramos para evitar race conditions
+        if (actualizando) return;
+
+        actualizando = true;
+        await actualizarPantallaOperador();
+        actualizando = false;
     });
 });
 
+// --- CARGA DE DATOS DEL OPERADOR ---
 async function cargarInfoOperador() {
     try {
         const estId = parseInt(user.establecimiento_id) || 1;
@@ -5792,7 +5852,7 @@ async function cargarInfoOperador() {
         
         if (op) {
             const nombrePuesto = op.puesto || `Puesto ${op.id}`;
-            setText('display-puesto',nombrePuesto);
+            setText('display-puesto', nombrePuesto);
             setText('saludo-operador', `¡Hola, ${op.nombre}!`);
             setText('username-operador', `@${op.username}`);
             
@@ -5805,43 +5865,47 @@ async function cargarInfoOperador() {
 }
 
 // --- LÓGICA PRINCIPAL DE INTERFAZ ---
+// Consulta el estado actual al backend y actualiza los botones y la cola
 async function actualizarPantallaOperador() {
     try {
-        // 1. Obtener estado actual (quién está en el puesto)
+        // 1. Obtener estado actual (quién está en el puesto: llamando o atendiendo)
         const turnoAtendido = await api.request('GET', `/turnos/estado_actual/${operadorId}`, null, api.getToken());
         
         const btnSiguiente = document.getElementById('btn-siguiente');
         const btnAtender = document.getElementById('btn-atender');
         const btnFinalizar = document.getElementById('btn-finalizar');
         const displayTurno = document.getElementById('turno-actual');
-        const labelEstado = document.getElementById('label-estado');
 
-        // Reset visual
+        // Reset visual: ocultamos todos los botones antes de decidir cuál mostrar
         btnSiguiente.classList.add('hidden');
         btnAtender.classList.add('hidden');
         btnFinalizar.classList.add('hidden');
 
         if (!turnoAtendido || Object.keys(turnoAtendido).length === 0) {
+            // No hay turno activo: mostrar botón para llamar al siguiente
             turnoActualId = null;
             setText('turno-actual', '---');
             displayTurno.classList.add('text-slate-300');
             setText('label-estado', 'ESPERANDO ACCIÓN');
             btnSiguiente.classList.remove('hidden');
         } else {
+            // Hay un turno activo: guardamos su ID y mostramos el botón correspondiente
             turnoActualId = turnoAtendido.id;
             setText('turno-actual', turnoAtendido.codigo);
             displayTurno.classList.remove('text-slate-300');
 
             if (turnoAtendido.estado === 'llamando') {
+                // El cliente fue llamado pero aún no llegó al puesto
                 setText('label-estado', 'LLAMANDO CLIENTE...');
                 btnAtender.classList.remove('hidden');
             } else if (turnoAtendido.estado === 'atendiendo') {
+                // El cliente ya está siendo atendido
                 setText('label-estado', 'ATENDIENDO AHORA');
                 btnFinalizar.classList.remove('hidden');
             }
         }
 
-        // 2. Cargar la lista de espera (derecha)
+        // 2. Cargar la lista de espera (panel derecho)
         const cola = await api.getCola(operadorId);
         renderizarLista(cola);
 
@@ -5852,56 +5916,73 @@ async function actualizarPantallaOperador() {
 
 // --- ACCIONES DE BOTONES ---
 
+// Llama al siguiente turno en espera
 window.llamarSiguiente = async () => {
+    if (actualizando) return; // Evita doble click
     try {
+        actualizando = true;
         await api.siguienteTurno(operadorId);
         await actualizarPantallaOperador();
     } catch (err) {
         alert(err.message);
+    } finally {
+        actualizando = false; // Siempre libera el flag, incluso si hay error
     }
 };
 
+// Confirma que el cliente llegó al puesto e inicia la atención
 window.iniciarAtencion = async () => {
-    if (!turnoActualId) return;
+    if (!turnoActualId || actualizando) return;
     try {
+        actualizando = true;
         await api.iniciarAtencion(turnoActualId);
         await actualizarPantallaOperador();
     } catch (err) {
         alert(err.message);
+    } finally {
+        actualizando = false;
     }
 };
 
+// Finaliza la atención del turno actual
 window.finalizarAtencion = async () => {
-    if (!turnoActualId) return;
+    if (!turnoActualId || actualizando) return;
     try {
+        actualizando = true;
         await api.finalizarTurno(turnoActualId);
-        turnoActualId = null;
+        turnoActualId = null; // Limpiamos el ID local antes de refrescar
         await actualizarPantallaOperador();
     } catch (err) {
         alert(err.message);
+    } finally {
+        actualizando = false;
     }
 };
 
+// Abre o cierra la fila del operador
 window.pausarFila = async () => {
     try {
         const res = await api.toggleFila(operadorId);
-        // res suele traer el nuevo estado de 'fila_abierta'
+        // res trae el nuevo estado de 'fila_abierta'
         actualizarVisualPausa(res.fila_abierta);
     } catch (err) {
         alert("No se pudo cambiar el estado de la fila");
     }
 };
 
+// Actualiza el estilo del botón de pausa según si la fila está abierta o cerrada
 function actualizarVisualPausa(estaAbierta) {
     const btnPausa = document.getElementById('btn-pausa');
     const txtPausa = document.getElementById('txt-pausa');
     if (!btnPausa || !txtPausa) return;
 
     if (!estaAbierta) {
+        // Fila cerrada: mostrar opción de reanudar
         btnPausa.classList.replace('bg-amber-100', 'bg-green-100');
         btnPausa.classList.replace('text-amber-700', 'text-green-700');
         txtPausa.innerText = "Reanudar Fila";
     } else {
+        // Fila abierta: mostrar opción de pausar
         btnPausa.classList.replace('bg-green-100', 'bg-amber-100');
         btnPausa.classList.replace('text-green-700', 'text-amber-700');
         txtPausa.innerText = "Pausar Fila";
@@ -5910,6 +5991,7 @@ function actualizarVisualPausa(estaAbierta) {
 
 // --- UTILIDADES ---
 
+// Renderiza la lista de turnos en espera en el panel derecho
 function renderizarLista(cola) {
     const contenedor = document.getElementById('lista-espera');
     if (!contenedor) return;
@@ -5932,11 +6014,13 @@ function renderizarLista(cola) {
     `).join('');
 }
 
+// Helper para setear texto en un elemento por ID
 function setText(id, val) {
     const el = document.getElementById(id);
     if (el) el.innerText = val;
 }
 
+// Cancela un turno específico de la lista de espera
 window.cancelarTurnoPorId = async (turnoId) => {
     if (!confirm('¿Cancelar este turno?')) return;
     try {
