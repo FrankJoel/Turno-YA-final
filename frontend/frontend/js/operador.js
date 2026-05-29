@@ -204,9 +204,10 @@ function renderizarLista(cola) {
     contenedor.innerHTML = cola.map(t => `
         <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
             <div>
-                <p class="font-black text-primary text-lg">${t.codigo}</p>
-                <p class="text-[10px] text-slate-400 uppercase">${t.motivo || 'Consulta general'}</p>
-            </div>
+              <p class="font-black text-primary text-lg">${t.codigo}</p>
+              <p class="text-sm font-bold text-slate-600">${t.nombre_cliente || ''}</p>
+              <p class="text-[10px] text-slate-400 uppercase">${t.motivo || 'Consulta general'}</p>
+             </div>
             <button onclick="cancelarTurnoPorId(${t.id})" class="text-slate-300 hover:text-red-500 transition-colors">
                 <span class="material-symbols-outlined">cancel</span>
             </button>

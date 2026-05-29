@@ -13,6 +13,7 @@ let yaVibroProximidad = false; // Flag para no vibrar repetidamente en pos === 1
 let tiempoRestanteLocal = 0;
 let intervaloCuentaRegresiva = null;
 let yaFinalizado = false;
+let yaNotificóProximidad = false;
 
 function init() {
 
@@ -65,7 +66,10 @@ async function actualizarPosicion() {
       alertaProximidad?.classList.remove('hidden');
 
       // Notificación del sistema (si el usuario dio permiso)
-      notificarProximidad();
+      if (!yaNotificóProximidad) {
+        notificarProximidad();
+        yaNotificóProximidad = true;
+      }
 
       // Vibración en Android — solo la primera vez que llega a pos === 1
       if (!yaVibroProximidad) {
@@ -76,6 +80,7 @@ async function actualizarPosicion() {
       // Ya no es el próximo — ocultamos el banner y reseteamos el flag
       alertaProximidad?.classList.add('hidden');
       yaVibroProximidad = false;
+      yaNotificóProximidad = false;
     }
 
     if (pos === 0) {
