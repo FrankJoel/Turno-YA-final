@@ -10,6 +10,7 @@ const operadorId  = parseInt(localStorage.getItem('cliente_operador_id') || '0')
 
 let wsConexion = null;
 let yaSonóAlerta = false;
+let yaVibroProximidad = false; // Flag para no vibrar repetidamente en pos === 1
 let tiempoRestanteLocal = 0;
 let intervaloCuentaRegresiva = null;
 let yaFinalizado = false;
@@ -32,20 +33,7 @@ function init() {
   actualizarPosicion();
   pedirPermisoNotificaciones();
 
-  // Refresco de seguridad cada 15 segundos (por si falla el WS)
-  setInterval(actualizarPosicion, 15000);
-
-  // Conexión al WebSocket usando el ID del operador que lo atiende
-  if (operadorId > 0) {
-    wsConexion = api.conectarWS(operadorId, (data) => {
-      // Si el peluquero realiza cualquier acción, refrescamos la posición
-      const eventosRefresco = ['siguiente_turno', 'turno_atendiendo', 'turno_cancelado', 'turno_finalizado'];
-      if (eventosRefresco.includes(data.evento)) {
-        actualizarPosicion();
-      }
-    });
-  }
-}
+  setInterval(actualizarPosicion, 5000);
 
 async function actualizarPosicion() {
   try {
@@ -69,11 +57,23 @@ async function actualizarPosicion() {
     setText('nombre-peluquero', nombreOp ? `Con: ${nombreOp}` : "");
 
     const alertaProximidad = document.getElementById('alerta-proximidad');
+
     if (pos === 1) {
+      // El cliente es el próximo — mostramos el banner llamativo
       alertaProximidad?.classList.remove('hidden');
+
+      // Notificación del sistema (si el usuario dio permiso)
       notificarProximidad();
+
+      // Vibración en Android — solo la primera vez que llega a pos === 1
+      if (!yaVibroProximidad) {
+        if (navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 400]);
+        yaVibroProximidad = true;
+      }
     } else {
+      // Ya no es el próximo — ocultamos el banner y reseteamos el flag
       alertaProximidad?.classList.add('hidden');
+      yaVibroProximidad = false;
     }
 
     if (pos === 0) {
@@ -90,6 +90,8 @@ async function actualizarPosicion() {
 
       if (!yaSonóAlerta) {
         reproducirSonido();
+        // Vibración más intensa al ser llamado
+        if (navigator.vibrate) navigator.vibrate([600, 200, 600, 200, 600]);
         yaSonóAlerta = true;
       }
     } else {
@@ -211,7 +213,7 @@ function calcularHoraEstimada(minutosEspera) {
 function actualizarTextosTiempo(min) {
   setText('espera-min', `${min} min`);
   const horaEstimada = calcularHoraEstimada(min);
-  setText('hora-estimada', `${horaEstimada} hs`);
+  setText('hora-estimada', `~${horaEstimada} hs`);
 }
 
 async function pedirPermisoNotificaciones() {
