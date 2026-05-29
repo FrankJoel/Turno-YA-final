@@ -138,12 +138,24 @@ def get_posicion(turno_id: int, db: Session = Depends(get_db)):
         posicion = -1
         tiempo_estimado = 0
 
+   # Buscar el turno que está siendo llamado/atendiendo en ese operador
+    turno_activo = (
+        db.query(Turno)
+        .filter(
+            Turno.operador_id == turno.operador_id,
+            Turno.estado.in_(["llamando", "atendiendo"])
+        )
+        .first()
+    )
+
     return {
         "turno_id": turno_id,
         "codigo": turno.codigo,
         "estado": turno.estado,
         "posicion": posicion,
         "tiempo_estimado_minutos": tiempo_estimado,
+        "codigo_atendiendo": turno_activo.codigo if turno_activo else None,
+        "nombre_operador": turno.operador.nombre if turno.operador else None,
     }
 
 
