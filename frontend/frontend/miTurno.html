@@ -25,6 +25,12 @@
     .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
     body { font-family:'Inter', sans-serif; -webkit-font-smoothing:antialiased; background-color:#f7f9fc; }
     h1, h2, h3, .font-headline { font-family:'Manrope', sans-serif; }
+
+    /* Animación del banner de proximidad */
+    @keyframes pulse-amber {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(251,191,36,0.7); }
+      50%       { transform: scale(1.03); box-shadow: 0 0 0 10px rgba(251,191,36,0); }
+    }
   </style>
 </head>
 
@@ -87,28 +93,37 @@
       </div>
 
       <!-- Panel lateral -->
-<div class="md:col-span-4 flex flex-col gap-6">
+      <div class="md:col-span-4 flex flex-col gap-6">
 
-          <div class="bg-white border border-slate-100 rounded-3xl p-8 flex flex-col shadow-sm">
-            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 text-center">Estado de la fila</span>
-            
-            <div id="alerta-proximidad" class="hidden animate-bounce mb-6 bg-amber-100 border border-amber-200 p-4 rounded-2xl text-center">
-                <p class="text-amber-800 font-black text-sm uppercase tracking-tighter">⚠️ ¡Sos el próximo!</p>
-                <p class="text-amber-700 text-[10px] font-bold">Acercate o estate atento</p>
+        <div class="bg-white border border-slate-100 rounded-3xl p-8 flex flex-col shadow-sm">
+          <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 text-center">Estado de la fila</span>
+
+          <!-- Banner de proximidad — se muestra cuando el cliente es el próximo (pos === 1) -->
+          <div id="alerta-proximidad"
+               class="hidden mb-6 rounded-2xl text-center overflow-hidden shadow-lg border-2 border-amber-400"
+               style="animation: pulse-amber 1s ease-in-out infinite;">
+            <div class="bg-amber-400 py-2">
+              <p class="text-white font-black text-xs uppercase tracking-widest">⚠️ ¡PRÓXIMO EN LA FILA!</p>
             </div>
+            <div class="bg-amber-50 p-4">
+              <p class="text-amber-900 font-black text-lg">Acercate al local</p>
+              <p class="text-amber-700 text-xs font-bold mt-1">Tu turno está por ser llamado</p>
+            </div>
+          </div>
 
-            <div class="space-y-6 relative">
-              <div class="flex items-center gap-4">
-                <div class="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
-                  <span class="material-symbols-outlined text-slate-400 text-sm">person</span>
-                </div>
-                <div>
-                  <p class="text-[9px] font-black uppercase text-slate-400 tracking-tighter">Llamando ahora</p>
-                  <p id="llamando-ahora" class="text-xl font-headline font-bold text-slate-600">--</p>
-                  <p id="nombre-peluquero" class="text-[10px] font-bold text-primary uppercase mt-1"></p>
-                </div>
+          <div class="space-y-6 relative">
+            <div class="flex items-center gap-4">
+              <div class="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
+                <span class="material-symbols-outlined text-slate-400 text-sm">person</span>
               </div>
-              <hr class="border-slate-50">            <div class="flex items-center gap-4">
+              <div>
+                <p class="text-[9px] font-black uppercase text-slate-400 tracking-tighter">Llamando ahora</p>
+                <p id="llamando-ahora" class="text-xl font-headline font-bold text-slate-600">--</p>
+                <p id="nombre-peluquero" class="text-[10px] font-bold text-primary uppercase mt-1"></p>
+              </div>
+            </div>
+            <hr class="border-slate-50">
+            <div class="flex items-center gap-4">
               <div class="w-8 h-8 rounded-full bg-primary border-2 border-white flex items-center justify-center shadow-md">
                 <div class="w-2 h-2 rounded-full bg-white animate-pulse"></div>
               </div>
@@ -136,22 +151,22 @@
         </button>
       </div>
     </div>
-</main>
-</main>
+  </main>
 
   <div id="modal-finalizado" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
-      <div class="bg-white rounded-3xl p-10 max-w-sm w-full text-center shadow-2xl">
-          <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <span class="material-symbols-outlined text-5xl">check_circle</span>
-          </div>
-          <h2 class="font-headline font-black text-2xl text-slate-800 mb-2">¡Turno Finalizado!</h2>
-          <p class="text-slate-500 mb-8">Gracias por venir ¡te esperamos pronto!</p>
-          <button onclick="window.location.href='index.html'" 
-                  class="w-full bg-primary text-white font-headline font-bold py-4 rounded-2xl hover:bg-primary-container transition-all">
-              VOLVER AL INICIO
-          </button>
+    <div class="bg-white rounded-3xl p-10 max-w-sm w-full text-center shadow-2xl">
+      <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+        <span class="material-symbols-outlined text-5xl">check_circle</span>
       </div>
+      <h2 class="font-headline font-black text-2xl text-slate-800 mb-2">¡Turno Finalizado!</h2>
+      <p class="text-slate-500 mb-8">Gracias por venir ¡te esperamos pronto!</p>
+      <button onclick="window.location.href='index.html'"
+              class="w-full bg-primary text-white font-headline font-bold py-4 rounded-2xl hover:bg-primary-container transition-all">
+        VOLVER AL INICIO
+      </button>
+    </div>
   </div>
+
   <script src="js/env.js"></script>
   <script type="module" src="js/gestion-turno-cliente.js"></script>
 </body>

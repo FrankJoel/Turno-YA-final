@@ -228,5 +228,9 @@ window.cancelarTurnoPorId = async (turnoId) => {
         await actualizarPantallaOperador();
     } catch (err) {
         alert(err.message);
-    }
+    }  
+};
+window.cerrarSesion = () => {
+    api.clearSession();
+    window.location.href = 'loginStaff.html';
 };

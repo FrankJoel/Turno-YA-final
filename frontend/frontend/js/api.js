@@ -37,7 +37,10 @@ const api = {
   clearSession() {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   },
+
 
   login: (username, password) =>
     api.request('POST', '/auth/login', { username, password }),

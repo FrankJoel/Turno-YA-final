@@ -8,7 +8,6 @@ const nombre      = localStorage.getItem('cliente_nombre') || 'Cliente';
 const hora        = localStorage.getItem('cliente_hora') || '--:--';
 const operadorId  = parseInt(localStorage.getItem('cliente_operador_id') || '0');
 
-let wsConexion = null;
 let yaSonóAlerta = false;
 let yaVibroProximidad = false; // Flag para no vibrar repetidamente en pos === 1
 let tiempoRestanteLocal = 0;
@@ -33,7 +32,10 @@ function init() {
   actualizarPosicion();
   pedirPermisoNotificaciones();
 
+  // Polling cada 5 segundos — reemplaza al WebSocket que Render no soporta en plan gratuito
   setInterval(actualizarPosicion, 5000);
+
+} // ← cierre de init
 
 async function actualizarPosicion() {
   try {
@@ -78,7 +80,7 @@ async function actualizarPosicion() {
 
     if (pos === 0) {
       // --- LÓGICA DE ATENDIENDO ---
-      detenerCronometroLocal(); // Paramos la cuenta si ya pasó
+      detenerCronometroLocal();
       setText('tu-posicion', '¡Es tu turno!');
       setText('espera-min', '¡PASÁ!');
       setText('hora-estimada', 'Atención en curso');

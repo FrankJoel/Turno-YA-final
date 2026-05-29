@@ -66,4 +66,11 @@ document.addEventListener('DOMContentLoaded', () => {
     el.innerText = msg;
     setTimeout(() => el?.remove(), 5000);
   }
+  window.cerrarSesion = () => {
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'loginStaff.html';
+};
 });
