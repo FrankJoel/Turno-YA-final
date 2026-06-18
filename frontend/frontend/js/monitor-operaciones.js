@@ -93,7 +93,7 @@ function renderizarOperadores(operadores) {
     return `
       <div class="grid grid-cols-12 px-8 py-5 items-center hover:bg-white/50 transition-colors border-b border-slate-50 last:border-none ${activo ? '' : 'opacity-60'}">
         <div class="col-span-5 flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-primary text-sm">
+          <div class="w-10 h-10 rounded-fu1ll bg-blue-100 flex items-center justify-center font-bold text-primary text-sm">
             ${iniciales}
           </div>
           <div class="flex flex-col">

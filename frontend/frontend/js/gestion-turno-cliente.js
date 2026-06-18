@@ -119,8 +119,7 @@ async function actualizarPosicion() {
 
   } catch (err) {
     // Solo mostramos finalizado si es un error 404 (turno no existe)
-    // Si es un error de red/timeout, lo ignoramos silenciosamente para no
-    // mostrar "Turno Finalizado" por culpa de Render siendo lento
+    // Si es un error de red/timeout, lo ignoramos 
     if (err.message && err.message.includes('404')) {
       mostrarFinalizado();
     } else {
@@ -136,11 +135,8 @@ function mostrarFinalizado() {
   const modal = document.getElementById('modal-finalizado');
   if (modal) modal.classList.remove('hidden');
 
-  // Redirige al inicio después de 2 minutos
-  setTimeout(() => {
+  // Limpiamos la sesión del cliente, pero no redirigimos
     limpiarSesionCliente();
-    window.location.href = 'index.html';
-  }, 120000);
 }
 
 async function cancelarTurno() {
@@ -151,7 +147,7 @@ async function cancelarTurno() {
     console.warn('Error al cancelar:', e.message);
   } finally {
     limpiarSesionCliente();
-    window.location.href = 'index.html';
+    mostrarFinalizado();
   }
 }
 

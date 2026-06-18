@@ -1091,12 +1091,24 @@ def get_posicion(turno_id: int, db: Session = Depends(get_db)):
         posicion = -1
         tiempo_estimado = 0
 
+   # Buscar el turno que está siendo llamado/atendiendo en ese operador
+    turno_activo = (
+        db.query(Turno)
+        .filter(
+            Turno.operador_id == turno.operador_id,
+            Turno.estado.in_(["llamando", "atendiendo"])
+        )
+        .first()
+    )
+
     return {
         "turno_id": turno_id,
         "codigo": turno.codigo,
         "estado": turno.estado,
         "posicion": posicion,
         "tiempo_estimado_minutos": tiempo_estimado,
+        "codigo_atendiendo": turno_activo.codigo if turno_activo else None,
+        "nombre_operador": turno.operador.nombre if turno.operador else None,
     }
 
 
@@ -3466,6 +3478,12 @@ manager = ConnectionManager()
     .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
     body { font-family:'Inter', sans-serif; -webkit-font-smoothing:antialiased; background-color:#f7f9fc; }
     h1, h2, h3, .font-headline { font-family:'Manrope', sans-serif; }
+
+    /* Animación del banner de proximidad */
+    @keyframes pulse-amber {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(251,191,36,0.7); }
+      50%       { transform: scale(1.03); box-shadow: 0 0 0 10px rgba(251,191,36,0); }
+    }
   </style>
 </head>
 
@@ -3528,28 +3546,37 @@ manager = ConnectionManager()
       </div>
 
       <!-- Panel lateral -->
-<div class="md:col-span-4 flex flex-col gap-6">
+      <div class="md:col-span-4 flex flex-col gap-6">
 
-          <div class="bg-white border border-slate-100 rounded-3xl p-8 flex flex-col shadow-sm">
-            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 text-center">Estado de la fila</span>
-            
-            <div id="alerta-proximidad" class="hidden animate-bounce mb-6 bg-amber-100 border border-amber-200 p-4 rounded-2xl text-center">
-                <p class="text-amber-800 font-black text-sm uppercase tracking-tighter">⚠️ ¡Sos el próximo!</p>
-                <p class="text-amber-700 text-[10px] font-bold">Acercate o estate atento</p>
+        <div class="bg-white border border-slate-100 rounded-3xl p-8 flex flex-col shadow-sm">
+          <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 text-center">Estado de la fila</span>
+
+          <!-- Banner de proximidad — se muestra cuando el cliente es el próximo (pos === 1) -->
+          <div id="alerta-proximidad"
+               class="hidden mb-6 rounded-2xl text-center overflow-hidden shadow-lg border-2 border-amber-400"
+               style="animation: pulse-amber 1s ease-in-out infinite;">
+            <div class="bg-amber-400 py-2">
+              <p class="text-white font-black text-xs uppercase tracking-widest">⚠️ ¡PRÓXIMO EN LA FILA!</p>
             </div>
+            <div class="bg-amber-50 p-4">
+              <p class="text-amber-900 font-black text-lg">Acercate al local</p>
+              <p class="text-amber-700 text-xs font-bold mt-1">Tu turno está por ser llamado</p>
+            </div>
+          </div>
 
-            <div class="space-y-6 relative">
-              <div class="flex items-center gap-4">
-                <div class="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
-                  <span class="material-symbols-outlined text-slate-400 text-sm">person</span>
-                </div>
-                <div>
-                  <p class="text-[9px] font-black uppercase text-slate-400 tracking-tighter">Llamando ahora</p>
-                  <p id="llamando-ahora" class="text-xl font-headline font-bold text-slate-600">--</p>
-                  <p id="nombre-peluquero" class="text-[10px] font-bold text-primary uppercase mt-1"></p>
-                </div>
+          <div class="space-y-6 relative">
+            <div class="flex items-center gap-4">
+              <div class="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
+                <span class="material-symbols-outlined text-slate-400 text-sm">person</span>
               </div>
-              <hr class="border-slate-50">            <div class="flex items-center gap-4">
+              <div>
+                <p class="text-[9px] font-black uppercase text-slate-400 tracking-tighter">Llamando ahora</p>
+                <p id="llamando-ahora" class="text-xl font-headline font-bold text-slate-600">--</p>
+                <p id="nombre-peluquero" class="text-[10px] font-bold text-primary uppercase mt-1"></p>
+              </div>
+            </div>
+            <hr class="border-slate-50">
+            <div class="flex items-center gap-4">
               <div class="w-8 h-8 rounded-full bg-primary border-2 border-white flex items-center justify-center shadow-md">
                 <div class="w-2 h-2 rounded-full bg-white animate-pulse"></div>
               </div>
@@ -3577,22 +3604,22 @@ manager = ConnectionManager()
         </button>
       </div>
     </div>
-</main>
-</main>
+  </main>
 
   <div id="modal-finalizado" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
-      <div class="bg-white rounded-3xl p-10 max-w-sm w-full text-center shadow-2xl">
-          <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <span class="material-symbols-outlined text-5xl">check_circle</span>
-          </div>
-          <h2 class="font-headline font-black text-2xl text-slate-800 mb-2">¡Turno Finalizado!</h2>
-          <p class="text-slate-500 mb-8">Gracias por venir ¡te esperamos pronto!</p>
-          <button onclick="window.location.href='index.html'" 
-                  class="w-full bg-primary text-white font-headline font-bold py-4 rounded-2xl hover:bg-primary-container transition-all">
-              VOLVER AL INICIO
-          </button>
+    <div class="bg-white rounded-3xl p-10 max-w-sm w-full text-center shadow-2xl">
+      <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+        <span class="material-symbols-outlined text-5xl">check_circle</span>
       </div>
+      <h2 class="font-headline font-black text-2xl text-slate-800 mb-2">¡Turno Finalizado!</h2>
+      <p class="text-slate-500 mb-8">Gracias por venir ¡te esperamos pronto!</p>
+      <button onclick="window.location.href='index.html'"
+              class="w-full bg-primary text-white font-headline font-bold py-4 rounded-2xl hover:bg-primary-container transition-all">
+        VOLVER AL INICIO
+      </button>
+    </div>
   </div>
+
   <script src="js/env.js"></script>
   <script type="module" src="js/gestion-turno-cliente.js"></script>
 </body>
@@ -4089,6 +4116,7 @@ manager = ConnectionManager()
 
 </body>
 </html>
+
 
 
 // =====================================================
@@ -4589,6 +4617,13 @@ document.addEventListener('DOMContentLoaded', () => {
     el.innerText = msg;
     setTimeout(() => el?.remove(), 5000);
   }
+  window.cerrarSesion = () => {
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'loginStaff.html';
+};
 });
 
 
@@ -4778,7 +4813,10 @@ const api = {
   clearSession() {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   },
+
 
   login: (username, password) =>
     api.request('POST', '/auth/login', { username, password }),
@@ -5290,11 +5328,12 @@ const nombre      = localStorage.getItem('cliente_nombre') || 'Cliente';
 const hora        = localStorage.getItem('cliente_hora') || '--:--';
 const operadorId  = parseInt(localStorage.getItem('cliente_operador_id') || '0');
 
-let wsConexion = null;
 let yaSonóAlerta = false;
+let yaVibroProximidad = false; // Flag para no vibrar repetidamente en pos === 1
 let tiempoRestanteLocal = 0;
 let intervaloCuentaRegresiva = null;
 let yaFinalizado = false;
+let yaNotificóProximidad = false;
 
 function init() {
 
@@ -5314,20 +5353,10 @@ function init() {
   actualizarPosicion();
   pedirPermisoNotificaciones();
 
-  // Refresco de seguridad cada 15 segundos (por si falla el WS)
-  setInterval(actualizarPosicion, 15000);
+  // Polling cada 5 segundos — reemplaza al WebSocket que Render no soporta en plan gratuito
+  setInterval(actualizarPosicion, 5000);
 
-  // Conexión al WebSocket usando el ID del operador que lo atiende
-  if (operadorId > 0) {
-    wsConexion = api.conectarWS(operadorId, (data) => {
-      // Si el peluquero realiza cualquier acción, refrescamos la posición
-      const eventosRefresco = ['siguiente_turno', 'turno_atendiendo', 'turno_cancelado', 'turno_finalizado'];
-      if (eventosRefresco.includes(data.evento)) {
-        actualizarPosicion();
-      }
-    });
-  }
-}
+} // ← cierre de init
 
 async function actualizarPosicion() {
   try {
@@ -5351,16 +5380,32 @@ async function actualizarPosicion() {
     setText('nombre-peluquero', nombreOp ? `Con: ${nombreOp}` : "");
 
     const alertaProximidad = document.getElementById('alerta-proximidad');
+
     if (pos === 1) {
+      // El cliente es el próximo — mostramos el banner llamativo
       alertaProximidad?.classList.remove('hidden');
-      notificarProximidad();
+
+      // Notificación del sistema (si el usuario dio permiso)
+      if (!yaNotificóProximidad) {
+        notificarProximidad();
+        yaNotificóProximidad = true;
+      }
+
+      // Vibración en Android — solo la primera vez que llega a pos === 1
+      if (!yaVibroProximidad) {
+        if (navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 400]);
+        yaVibroProximidad = true;
+      }
     } else {
+      // Ya no es el próximo — ocultamos el banner y reseteamos el flag
       alertaProximidad?.classList.add('hidden');
+      yaVibroProximidad = false;
+      yaNotificóProximidad = false;
     }
 
     if (pos === 0) {
       // --- LÓGICA DE ATENDIENDO ---
-      detenerCronometroLocal(); // Paramos la cuenta si ya pasó
+      detenerCronometroLocal();
       setText('tu-posicion', '¡Es tu turno!');
       setText('espera-min', '¡PASÁ!');
       setText('hora-estimada', 'Atención en curso');
@@ -5372,6 +5417,8 @@ async function actualizarPosicion() {
 
       if (!yaSonóAlerta) {
         reproducirSonido();
+        // Vibración más intensa al ser llamado
+        if (navigator.vibrate) navigator.vibrate([600, 200, 600, 200, 600]);
         yaSonóAlerta = true;
       }
     } else {
@@ -5493,7 +5540,7 @@ function calcularHoraEstimada(minutosEspera) {
 function actualizarTextosTiempo(min) {
   setText('espera-min', `${min} min`);
   const horaEstimada = calcularHoraEstimada(min);
-  setText('hora-estimada', `${horaEstimada} hs`);
+  setText('hora-estimada', `~${horaEstimada} hs`);
 }
 
 async function pedirPermisoNotificaciones() {
@@ -6004,9 +6051,10 @@ function renderizarLista(cola) {
     contenedor.innerHTML = cola.map(t => `
         <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
             <div>
-                <p class="font-black text-primary text-lg">${t.codigo}</p>
-                <p class="text-[10px] text-slate-400 uppercase">${t.motivo || 'Consulta general'}</p>
-            </div>
+              <p class="font-black text-primary text-lg">${t.codigo}</p>
+              <p class="text-sm font-bold text-slate-600">${t.nombre_cliente || ''}</p>
+              <p class="text-[10px] text-slate-400 uppercase">${t.motivo || 'Consulta general'}</p>
+             </div>
             <button onclick="cancelarTurnoPorId(${t.id})" class="text-slate-300 hover:text-red-500 transition-colors">
                 <span class="material-symbols-outlined">cancel</span>
             </button>
@@ -6028,7 +6076,11 @@ window.cancelarTurnoPorId = async (turnoId) => {
         await actualizarPantallaOperador();
     } catch (err) {
         alert(err.message);
-    }
+    }  
+};
+window.cerrarSesion = () => {
+    api.clearSession();
+    window.location.href = 'loginStaff.html';
 };
 
 
@@ -6036,6 +6088,7 @@ window.cancelarTurnoPorId = async (turnoId) => {
 // ARCHIVO: frontend\frontend\js\registro-cliente.js
 // =====================================================
 
+// js/registro-cliente.js
 import api from './api.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -6055,24 +6108,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!operadorId || isNaN(operadorId) || !estIdParam || isNaN(estIdParam)) {
         console.error("ERROR: QR incompleto.");
         mostrarErrorGlobal("El código QR es inválido o está incompleto.");
-        return; 
+        return;
     }
 
     establecimientoIdDinamico = estIdParam;
 
     // 1. Carga de datos del operador y servicios
     try {
-        const dataOp = await api.request('GET', `/operadores/${operadorId}`); 
-        
+        const dataOp = await api.request('GET', `/operadores/${operadorId}`);
+
         // Sincronizamos el ID del establecimiento desde la DB
-        establecimientoIdDinamico = dataOp.establecimiento_id; 
+        establecimientoIdDinamico = dataOp.establecimiento_id;
 
         if (dataOp.servicios && dataOp.servicios.length > 0) {
             selectMotivo.innerHTML = '<option value="" disabled selected>Seleccioná un motivo...</option>';
 
             dataOp.servicios.forEach(s => {
                 const opt = document.createElement('option');
-                opt.value = s.motivo; 
+                opt.value = s.motivo;
                 const tiempoValido = /^\d{1,2}:\d{2}$|^\d+$/.test(s.tiempo_estimado?.trim());
                 opt.innerText = tiempoValido
                     ? `${s.motivo} (${s.tiempo_estimado} min)`
@@ -6088,7 +6141,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         mostrarErrorGlobal("Error al conectar con el servidor.");
     }
 
-    // 2. Manejo del envío del formulario
+    // 2. Verificación de turno activo al salir del campo DNI
+    // Si el cliente ya tiene un turno activo con este operador,
+    // le avisamos y lo redirigimos a miTurno.html en lugar de sacar uno nuevo
+    document.getElementById('dni').addEventListener('blur', async () => {
+        const dni = document.getElementById('dni').value.trim();
+        if (!dni || dni.length < 6) return;
+
+        try {
+            const turnoExistente = await api.buscarTurnoPorDni(dni, operadorId);
+
+            if (turnoExistente && turnoExistente.id) {
+                // Restauramos la sesión del cliente con el turno existente
+                localStorage.setItem('cliente_turno_id', turnoExistente.id);
+                localStorage.setItem('cliente_turno_cod', turnoExistente.codigo);
+                localStorage.setItem('cliente_nombre', turnoExistente.nombre_cliente);
+                localStorage.setItem('cliente_operador_id', operadorId);
+                const ahora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                localStorage.setItem('cliente_hora', ahora);
+
+                if (confirm(`Ya tenés el turno ${turnoExistente.codigo} activo. ¿Querés verlo?`)) {
+                    window.location.href = 'miTurno.html';
+                }
+            }
+        } catch (err) {
+            // Si da 404 significa que no tiene turno activo — dejamos seguir normalmente
+            console.log('Sin turno activo para este DNI, puede registrarse.');
+        }
+    });
+
+    // 3. Manejo del envío del formulario
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -6114,19 +6196,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 nombre_cliente: nombre,
                 motivo: motivo,
                 operador_id: operadorId,
-                establecimiento_id: establecimientoIdDinamico 
+                establecimiento_id: establecimientoIdDinamico
             });
+
             console.log('Turno creado:', turno);
+
             if ('serviceWorker' in navigator && 'PushManager' in window) {
                 await suscribirNotificaciones(turno.id);
             }
-            
-            // GUARDADO DE SESIÓN (Crítico para miTurno.html)
+
+            // GUARDADO DE SESIÓN (crítico para que miTurno.html funcione)
             localStorage.setItem('cliente_turno_id', turno.id);
             localStorage.setItem('cliente_turno_cod', turno.codigo);
             localStorage.setItem('cliente_nombre', nombre);
             localStorage.setItem('cliente_operador_id', operadorId);
-            
+
             const ahora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             localStorage.setItem('cliente_hora', ahora);
 
@@ -6158,30 +6242,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         alerta.innerText = msg;
         setTimeout(() => alerta?.remove(), 4000);
     }
+
     async function suscribirNotificaciones(turnoId) {
-    try {
-        // 1. Pedir clave pública VAPID al backend
-        const config = await api.request('GET', '/config/vapid-public-key');
-        const vapidPublicKey = config.public_key;
+        try {
+            // 1. Pedir clave pública VAPID al backend
+            const config = await api.request('GET', '/config/vapid-public-key');
+            const vapidPublicKey = config.public_key;
 
-        // 2. Registrar el Service Worker
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        await navigator.serviceWorker.ready;
+            // 2. Registrar el Service Worker
+            const registration = await navigator.serviceWorker.register('/sw.js');
+            await navigator.serviceWorker.ready;
 
-        // 3. Suscribirse al push
-        const suscripcion = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: vapidPublicKey
-        });
+            // 3. Suscribirse al push
+            const suscripcion = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: vapidPublicKey
+            });
 
-        // 4. Enviar el token al backend
-        await api.actualizarPushToken(turnoId, JSON.stringify(suscripcion));
-        console.log('Suscripción push registrada correctamente.');
+            // 4. Enviar el token al backend
+            await api.actualizarPushToken(turnoId, JSON.stringify(suscripcion));
+            console.log('Suscripción push registrada correctamente.');
 
-    } catch (err) {
-        console.warn('No se pudo suscribir a notificaciones push:', err);
+        } catch (err) {
+            console.warn('No se pudo suscribir a notificaciones push:', err);
+        }
     }
-}
+
     function mostrarErrorGlobal(msg) {
         const contenedor = document.querySelector('main') || document.body;
         contenedor.innerHTML = `
