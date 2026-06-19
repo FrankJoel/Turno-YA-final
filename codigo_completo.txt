@@ -3612,7 +3612,7 @@ manager = ConnectionManager()
         <span class="material-symbols-outlined text-5xl">check_circle</span>
       </div>
       <h2 class="font-headline font-black text-2xl text-slate-800 mb-2">¡Turno Finalizado!</h2>
-      <p class="text-slate-500 mb-8">Gracias por venir ¡te esperamos pronto!</p>
+      <p class="text-slate-500 mb-8">Gracias por venir ¡te esperamos pronto!<br>Para sacar un nuevo turno, volvé a escanear el código QR.</p>
       <button onclick="window.location.href='index.html'"
               class="w-full bg-primary text-white font-headline font-bold py-4 rounded-2xl hover:bg-primary-container transition-all">
         VOLVER AL INICIO
@@ -3949,7 +3949,7 @@ manager = ConnectionManager()
         <div class="flex-1 max-w-2xl px-10">
             <div class="flex items-center gap-3 bg-tertiary-fixed text-on-tertiary-container px-6 py-3 rounded-full">
                 <span class="material-symbols-outlined text-tertiary">lightbulb</span>
-                <p class="font-body font-semibold text-lg">Tip: Tené tu identificación a mano.</p>
+                <p class="font-body font-semibold text-lg">Tip: Los tiempos son estimados.</p>
             </div>
         </div>
     </footer>
@@ -5439,8 +5439,7 @@ async function actualizarPosicion() {
 
   } catch (err) {
     // Solo mostramos finalizado si es un error 404 (turno no existe)
-    // Si es un error de red/timeout, lo ignoramos silenciosamente para no
-    // mostrar "Turno Finalizado" por culpa de Render siendo lento
+    // Si es un error de red/timeout, lo ignoramos 
     if (err.message && err.message.includes('404')) {
       mostrarFinalizado();
     } else {
@@ -5456,11 +5455,8 @@ function mostrarFinalizado() {
   const modal = document.getElementById('modal-finalizado');
   if (modal) modal.classList.remove('hidden');
 
-  // Redirige al inicio después de 2 minutos
-  setTimeout(() => {
+  // Limpiamos la sesión del cliente, pero no redirigimos
     limpiarSesionCliente();
-    window.location.href = 'index.html';
-  }, 120000);
 }
 
 async function cancelarTurno() {
@@ -5471,7 +5467,7 @@ async function cancelarTurno() {
     console.warn('Error al cancelar:', e.message);
   } finally {
     limpiarSesionCliente();
-    window.location.href = 'index.html';
+    mostrarFinalizado();
   }
 }
 
@@ -5809,7 +5805,7 @@ function renderizarOperadores(operadores) {
     return `
       <div class="grid grid-cols-12 px-8 py-5 items-center hover:bg-white/50 transition-colors border-b border-slate-50 last:border-none ${activo ? '' : 'opacity-60'}">
         <div class="col-span-5 flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-primary text-sm">
+          <div class="w-10 h-10 rounded-fu1ll bg-blue-100 flex items-center justify-center font-bold text-primary text-sm">
             ${iniciales}
           </div>
           <div class="flex flex-col">
