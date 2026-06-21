@@ -14,7 +14,7 @@ async function cargarMonitor() {
   try {
     const operadores = await api.getOperadores(establecimientoId);
     
-    // --- NUEVO: Traer el estado actual de turnos para cada operador ---
+    // ---  Traer el estado actual de turnos para cada operador ---
     // Usamos Promise.all para que sea rápido
     const operadoresConTurno = await Promise.all(operadores.map(async (op) => {
         try {
@@ -83,7 +83,7 @@ function renderizarOperadores(operadores) {
         }
     }
 
-    // Información del turno (si existe)
+    // Información del turno 
     const infoTurno = op.turno_actual 
         ? `<div class="text-[10px] text-slate-500 mt-0.5 font-normal">
              ${op.turno_actual.codigo} - ${op.turno_actual.motivo}

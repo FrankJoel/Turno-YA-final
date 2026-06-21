@@ -36,7 +36,7 @@ function init() {
   // Polling cada 5 segundos — reemplaza al WebSocket que Render no soporta en plan gratuito
   setInterval(actualizarPosicion, 5000);
 
-} // ← cierre de init
+} 
 
 async function actualizarPosicion() {
   try {
@@ -211,8 +211,8 @@ function calcularHoraEstimada(minutosEspera) {
 }
 
 // Actualiza los textos de tiempo en pantalla:
-// - espera-min: muestra los minutos restantes (ej: "40 min")
-// - hora-estimada: muestra la hora exacta calculada (ej: "~15:30 hs")
+// - espera-min: muestra los minutos restantes 
+// - hora-estimada: muestra la hora exacta calculada 
 function actualizarTextosTiempo(min) {
   setText('espera-min', `${min} min`);
   const horaEstimada = calcularHoraEstimada(min);

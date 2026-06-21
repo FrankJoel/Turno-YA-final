@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 1. SI ES EDICIÓN: Precargamos los datos
   if (editId) {
     try {
-      // Ajustamos la estética para modo edición sin tocar el CSS
+      // Ajustamos la estética para modo edición 
       document.querySelector('h3.text-2xl').innerText = "EDITAR OPERADOR";
       const btnSubmit = form.querySelector('button[type="submit"]');
       btnSubmit.innerHTML = `<span class="material-symbols-outlined">save</span> Guardar Cambios`;
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (motivoInput && motivoInput.value.trim()) {
           servicios.push({
             motivo: motivoInput.value.trim(),
-            // Ahora capturamos específicamente el valor del segundo input
+            // capturamos específicamente el valor del segundo input
             tiempo_estimado: tiempoInput?.value || "00:20"
           });
         }

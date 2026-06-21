@@ -2,7 +2,7 @@
 import api from './api.js';
 
 // --- ESTADO GLOBAL ---
-let turnoActualId = null;  // ID del turno activo en el puesto
+let turnoActualId = null;  
 let actualizando = false;  // Flag para evitar llamadas simultáneas al backend
 const user = api.getUser();
 const params = new URLSearchParams(window.location.search);
@@ -28,7 +28,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const linkStats = document.getElementById('link-stats');
     if (linkStats) linkStats.href = `estadisticaoperador.html?op=${operadorId}`;
 
-    // WebSocket en tiempo real — escucha eventos del backend
+    // WebSocket en tiempo real — 
     api.conectarWS(operadorId, async (data) => {
         // Solo reaccionamos a eventos relevantes para esta pantalla
         const eventosRelevantes = ['siguiente_turno', 'turno_atendiendo', 'turno_finalizado', 'turno_cancelado', 'nuevo_turno'];
@@ -170,7 +170,7 @@ window.pausarFila = async () => {
     }
 };
 
-// Actualiza el estilo del botón de pausa según si la fila está abierta o cerrada
+// Actualiza el estilo del botón de pausa 
 function actualizarVisualPausa(estaAbierta) {
     const btnPausa = document.getElementById('btn-pausa');
     const txtPausa = document.getElementById('txt-pausa');

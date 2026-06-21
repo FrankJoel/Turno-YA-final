@@ -50,7 +50,7 @@ function renderizarOperadores(operadores) {
     const esInactivo = !op.activo;
     const iniciales  = `${(op.nombre||' ').charAt(0)}${(op.apellido||' ').charAt(0)}`.toUpperCase();
     
-    // --- NUEVO: Conteo de servicios configurados ---
+    // ---  Conteo de servicios configurados ---
     const cantServicios = op.servicios ? op.servicios.length : 0;
     const badgeServicios = cantServicios > 0 
       ? `<span class="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-bold border border-blue-100">${cantServicios} servicios</span>`

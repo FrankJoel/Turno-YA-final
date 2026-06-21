@@ -146,7 +146,7 @@
     document.getElementById('saludo-operador').innerText = `Hola, ${user.nombre}`;
     document.getElementById('username-operador').innerText = `@${user.username || 'user'}`;
     
-    // Aquí usamos PUESTO para el texto (P1)
+    // Aquí usamos PUESTO para el texto 
     document.getElementById('display-puesto').innerText = user.puesto || `ID: ${user.operador_id}`;
 
     // 2. Lógica de Red (Lo que ve la base de datos)
@@ -166,7 +166,7 @@
             // Llamamos al backend (PATCH /operadores/{id}/fila)
             const nuevoEstado = await api.toggleFila(opId);
             
-            // Cambia el estilo del botón según el nuevo estado
+            // Cambia el estilo del botón según el estado
             actualizarInterfazFila(nuevoEstado.fila_abierta);
             
             alert(nuevoEstado.fila_abierta 

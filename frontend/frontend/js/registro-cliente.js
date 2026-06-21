@@ -52,8 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 2. Verificación de turno activo al salir del campo DNI
-    // Si el cliente ya tiene un turno activo con este operador,
-    // le avisamos y lo redirigimos a miTurno.html en lugar de sacar uno nuevo
+    
     document.getElementById('dni').addEventListener('blur', async () => {
         const dni = document.getElementById('dni').value.trim();
         if (!dni || dni.length < 6) return;

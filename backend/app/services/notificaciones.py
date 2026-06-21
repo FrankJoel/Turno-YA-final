@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Configuración de claves VAPID (Deben estar en tu .env)
+# Configuración de claves VAPID 
 VAPID_PRIVATE_KEY = os.getenv("VAPID_PRIVATE_KEY")
 VAPID_CLAIMS = {
     "sub": f"mailto:{os.getenv('ADMIN_EMAIL', 'admin@turnoya.com')}"
@@ -28,7 +28,7 @@ def enviar_push(push_token_json: str, titulo: str, cuerpo: str):
             data=json.dumps({
                 "title": titulo,
                 "body": cuerpo,
-                "icon": "/static/img/icon.png", # Ruta opcional al icono
+                "icon": "/static/img/icon.png", 
                 "badge": "/static/img/badge.png"
             }),
             vapid_private_key=VAPID_PRIVATE_KEY,
